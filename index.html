@@ -597,6 +597,7 @@ textarea,input,select{font-family:inherit}
 // ─── STORAGE ────────────────────────────────────────────────────────
 const K = { q:'mun_preguntas', p:'mun_participantes', pass:'mun_pass' };
 const PASS_DEFAULT = 'SDS2026';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBaCiJ3mTvycUqo58A4TpmJU1uZ0-mNE53Jfr0ZJqywnd_THRTGGfF35HLbvFYDJfs1w/exec';
 
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2) }
 function leer(k){ try{ return JSON.parse(localStorage.getItem(k)) }catch{return null} }
@@ -604,6 +605,47 @@ function guardar(k,v){ localStorage.setItem(k,JSON.stringify(v)) }
 function getQ(){ return leer(K.q)||PREGUNTAS_DEFAULT }
 function getP(){ return leer(K.p)||[] }
 function getPass(){ return leer(K.pass)||PASS_DEFAULT }
+
+let _pCache = null;
+
+async function enviarResultadoSheets(part) {
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        nombre: part.name,
+        puntaje: part.score,
+        correctas: part.correct,
+        incorrectas: part.incorrect,
+        fecha: part.date,
+        tiempo_segundos: part.tiempo || 0
+      })
+    });
+  } catch(e) { console.warn('Sheets POST error:', e); }
+}
+
+async function fetchParticipantesSheets() {
+  try {
+    const r = await fetch(APPS_SCRIPT_URL + '?t=' + Date.now());
+    const json = await r.json();
+    if (json.ok && Array.isArray(json.data)) {
+      return json.data
+        .map(d => ({
+          id: uid(),
+          name: d.nombre || '',
+          score: Number(d.puntaje) || 0,
+          correct: Number(d.correctas) || 0,
+          incorrect: Number(d.incorrectas) || 0,
+          date: d.fecha || new Date().toISOString(),
+          approved: Number(d.puntaje) >= 70
+        }))
+        .filter(p => p.name);
+    }
+  } catch(e) { console.warn('Sheets GET error:', e); }
+  return null;
+}
 
 const PREGUNTAS_DEFAULT = [
   { id:uid(), active:true, fails:0,
@@ -649,7 +691,7 @@ function ir(nombre){
   document.getElementById('screen-'+nombre).classList.remove('hidden');
   window.scrollTo(0,0);
   if(nombre==='podio') renderPodio();
-  if(nombre==='participantes') renderParticipantes();
+  if(nombre==='participantes'){ _pCache=null; renderParticipantes(); }
   if(nombre==='admin') renderAdmin();
 }
 function irAdminLogin(){
@@ -804,6 +846,7 @@ function mostrarResultado(){
     date:ahora.toISOString(), answers:respuestas
   };
   const ps=getP(); ps.push(part); guardar(K.p,ps);
+  enviarResultadoSheets(part); _pCache = null;
 
   // Actualizar fallos por pregunta
   const qs=getQ();
@@ -887,11 +930,13 @@ function confeti(){
 }
 
 // ─── PODIO ─────────────────────────────────────────────────────────
-function renderPodio(){
-  const ps=getP().sort((a,b)=>b.score-a.score||a.incorrect-b.incorrect||(new Date(a.date)-new Date(b.date)));
+async function renderPodio(){
+  const row=document.getElementById('podio-row');
+  row.innerHTML='<p style="color:rgba(255,255,255,.45);font-size:14px">⏳ Cargando resultados...</p>';
+  const sheetsData=await fetchParticipantesSheets();
+  const ps=(sheetsData||getP()).sort((a,b)=>b.score-a.score||a.incorrect-b.incorrect||(new Date(a.date)-new Date(b.date)));
 
   // Top 3 visual
-  const row=document.getElementById('podio-row');
   row.innerHTML='';
   if(ps.length===0){
     row.innerHTML='<p style="color:rgba(255,255,255,.45);font-size:14px">Aún no hay participantes.</p>';
@@ -952,8 +997,13 @@ function renderPodio(){
 }
 
 // ─── PARTICIPANTES ─────────────────────────────────────────────────
-function renderParticipantes(filtro=''){
-  const todos=getP();
+async function renderParticipantes(filtro=''){
+  if(!_pCache){
+    document.getElementById('part-tbody').innerHTML='<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,.45);padding:18px">⏳ Cargando...</td></tr>';
+    const sheetsData=await fetchParticipantesSheets();
+    _pCache=sheetsData||getP();
+  }
+  const todos=_pCache;
   const filt=filtro?todos.filter(p=>p.name.toLowerCase().includes(filtro.toLowerCase())):todos;
   const ord=[...filt].sort((a,b)=>new Date(b.date)-new Date(a.date));
   document.getElementById('count-txt').textContent=`${filt.length} de ${todos.length} participante(s)`;
@@ -975,8 +1025,10 @@ function renderParticipantes(filtro=''){
 function filtrar(){ renderParticipantes(document.getElementById('buscador').value); }
 
 // ─── ADMIN ─────────────────────────────────────────────────────────
-function renderAdmin(){
-  const ps=getP(); const qs=getQ();
+async function renderAdmin(){
+  document.getElementById('admin-stats').innerHTML='<div style="color:#64748b;font-size:13px;padding:8px">⏳ Cargando datos desde Google Sheets...</div>';
+  const sheetsData=await fetchParticipantesSheets();
+  const ps=sheetsData||getP(); const qs=getQ();
   const aprobados=ps.filter(p=>p.approved).length;
   const avg=ps.length?Math.round(ps.reduce((s,p)=>s+p.score,0)/ps.length):0;
   const mejor=ps.length?Math.max(...ps.map(p=>p.score)):0;
