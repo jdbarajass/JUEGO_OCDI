@@ -688,6 +688,7 @@ async function fetchParticipantesSheets() {
       return json.data
         .map(d => ({
           id: uid(),
+          _row: d._row,
           name: d.nombre || '',
           score: Number(d.puntaje) || 0,
           correct: Number(d.correctas) || 0,
@@ -1135,7 +1136,7 @@ async function renderAdmin(){
       <td class="pct-col">${p.score}%</td>
       <td class="${p.approved?'ok':'nok'}">${p.approved?'✅':'❌'}</td>
       <td style="font-size:11px;color:rgba(255,255,255,.45)">${d}</td>
-      <td><button class="btn-a-del" onclick="elimPart('${p.id}')">✕</button></td>`;
+      <td><button class="btn-a-del" onclick="elimPart(${p._row})">✕</button></td>`;
     tb.appendChild(tr);
   });
   if(ps2.length===0) tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#64748b;padding:16px">Sin participantes</td></tr>';
@@ -1150,14 +1151,20 @@ async function renderAdmin(){
     </div>`).join('')||'<p style="color:#64748b;font-size:13px">Sin participantes.</p>';
 }
 
-function borrarTodos(){
-  if(!confirm('¿Borrar TODOS los registros de participantes? Esta acción no se puede deshacer.')) return;
-  guardar(K.p,[]);
+async function borrarTodos(){
+  if(!confirm('¿Borrar TODOS los registros de participantes en Google Sheets? Esta acción no se puede deshacer.')) return;
+  guardar(K.p,[]); _pCache=null;
+  try {
+    await fetch(APPS_SCRIPT_URL + '?action=deleteAll&t=' + Date.now());
+  } catch(e) { console.warn('Sheets deleteAll error:', e); }
   renderAdmin();
 }
-function elimPart(id){
-  if(!confirm('¿Eliminar este registro?')) return;
-  guardar(K.p, getP().filter(p=>p.id!==id));
+async function elimPart(row){
+  if(!confirm('¿Eliminar este registro de Google Sheets?')) return;
+  _pCache=null;
+  try {
+    await fetch(APPS_SCRIPT_URL + '?action=deleteRow&row=' + row + '&t=' + Date.now());
+  } catch(e) { console.warn('Sheets deleteRow error:', e); }
   renderAdmin();
 }
 function eliminarPregunta(id){
