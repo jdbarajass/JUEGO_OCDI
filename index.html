@@ -77,7 +77,8 @@ textarea,input,select{font-family:inherit}
 .link-nav{color:#FFB81C;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;
   letter-spacing:1px;text-shadow:0 0 12px rgba(255,184,28,.4);transition:text-shadow .2s}
 .link-nav:hover{text-shadow:0 0 24px rgba(255,184,28,.9)}
-.footer-inst{text-align:center;font-size:11px;color:rgba(255,255,255,.32);line-height:1.9;letter-spacing:1px}
+.footer-inst{text-align:center;font-size:14px;color:rgba(255,255,255,.82);line-height:1.8;letter-spacing:1.5px;font-weight:600;font-family:'Rajdhani',sans-serif;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+.footer-inst strong{display:block;color:#FFB81C;font-size:16px;letter-spacing:2.5px;text-transform:uppercase;text-shadow:0 0 20px rgba(255,184,28,.55),0 1px 8px rgba(0,0,0,.8)}
 .btn-admin-oculto{background:transparent;border:none;color:rgba(255,255,255,.07);font-size:9px;padding:4px;margin-top:4px}
 
 /* ── ADMIN LOGIN ── */
@@ -901,6 +902,40 @@ function responder(sel){
   }, 1300);
 }
 
+// Posiciones iniciales y objetivo de cada jugador [top%, left%]
+const J_CO = {
+  ini: [[91,50],[80,22],[80,42],[80,62],[80,82],[67,18],[67,50],[67,82],[56,30],[56,70],[50,50]],
+  tgt: [[88,50],[64,22],[64,42],[64,62],[64,82],[44,18],[44,50],[44,82],[26,30],[26,70],[18,50]]
+};
+const J_AR = {
+  ini: [[9,50],[20,22],[20,42],[20,62],[20,82],[33,18],[33,50],[33,82],[43,30],[43,70],[49,50]],
+  tgt: [[9,50],[14,22],[14,42],[14,62],[14,82],[22,18],[22,50],[22,82],[30,30],[30,70],[35,50]]
+};
+
+function animarJugadores(n, animar){
+  const cancha=document.getElementById('cancha');
+  if(!cancha) return;
+  const total=GS.preguntas?GS.preguntas.length:10;
+  const p=Math.min(n/total,1);
+  const tr=animar?'top .9s cubic-bezier(.25,.46,.45,.94),left .9s cubic-bezier(.25,.46,.45,.94)':'none';
+  cancha.querySelectorAll('.jco-gk,.jco').forEach((el,i)=>{
+    const ini=J_CO.ini[i],tgt=J_CO.tgt[i];
+    if(!ini) return;
+    const xJ=animar?(Math.random()-.5)*3:0;
+    el.style.transition=tr;
+    el.style.top=(ini[0]+(tgt[0]-ini[0])*p).toFixed(1)+'%';
+    el.style.left=(ini[1]+(tgt[1]-ini[1])*p+xJ).toFixed(1)+'%';
+  });
+  cancha.querySelectorAll('.jar-gk,.jar').forEach((el,i)=>{
+    const ini=J_AR.ini[i],tgt=J_AR.tgt[i];
+    if(!ini) return;
+    const xJ=animar?(Math.random()-.5)*3:0;
+    el.style.transition=tr;
+    el.style.top=(ini[0]+(tgt[0]-ini[0])*p).toFixed(1)+'%';
+    el.style.left=(ini[1]+(tgt[1]-ini[1])*p+xJ).toFixed(1)+'%';
+  });
+}
+
 function posicionarBalon(n, animar){
   const balon=document.getElementById('balon');
   const pos=GS.posiciones||calcularPosiciones(10);
@@ -912,6 +947,7 @@ function posicionarBalon(n, animar){
     : 'none';
   balon.style.top=top+'%';
   balon.style.left=(POS_X[xi]+jitter)+'%';
+  animarJugadores(n, animar);
 }
 
 function mostrarEtiqueta(txt){
