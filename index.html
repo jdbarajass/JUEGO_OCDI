@@ -656,11 +656,12 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwBaCiJ3mTvycUq
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2) }
 function leer(k){ try{ return JSON.parse(localStorage.getItem(k)) }catch{return null} }
 function guardar(k,v){ localStorage.setItem(k,JSON.stringify(v)) }
-function getQ(){ return leer(K.q)||PREGUNTAS_DEFAULT }
+function getQ(){ return _qCache || leer(K.q) || PREGUNTAS_DEFAULT }
 function getP(){ return leer(K.p)||[] }
 function getPass(){ return leer(K.pass)||PASS_DEFAULT }
 
 let _pCache = null;
+let _qCache = null;
 
 async function enviarResultadoSheets(part) {
   try {
@@ -678,6 +679,38 @@ async function enviarResultadoSheets(part) {
       })
     });
   } catch(e) { console.warn('Sheets POST error:', e); }
+}
+
+async function fetchPreguntasSheets() {
+  try {
+    const r = await fetch(APPS_SCRIPT_URL + '?action=getPreguntas&t=' + Date.now());
+    const json = await r.json();
+    if (json.ok && Array.isArray(json.data) && json.data.length > 0) {
+      const qs = json.data.map(d => ({
+        id: String(d.id || uid()),
+        text: d.texto || '',
+        options: [d.op0||'', d.op1||'', d.op2||'', d.op3||''].filter(o => o),
+        correct: Number(d.correcta) || 0,
+        active: d.activa === true || d.activa === 'TRUE' || d.activa === 'true',
+        fails: Number(d.fallos) || 0
+      })).filter(q => q.text);
+      _qCache = qs;
+      guardar(K.q, qs);
+      return qs;
+    }
+  } catch(e) { console.warn('Sheets getPreguntas error:', e); }
+  return null;
+}
+
+async function savePreguntasSheets(qs) {
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'savePreguntas', preguntas: qs })
+    });
+  } catch(e) { console.warn('Sheets savePreguntas error:', e); }
 }
 
 async function fetchParticipantesSheets() {
@@ -738,6 +771,11 @@ const PREGUNTAS_DEFAULT = [
 // Inicializar storage
 if(!leer(K.q)) guardar(K.q, PREGUNTAS_DEFAULT);
 if(!leer(K.p)) guardar(K.p, []);
+
+// Cargar preguntas desde Sheets al iniciar
+fetchPreguntasSheets().then(qs => {
+  if (!qs || qs.length === 0) savePreguntasSheets(getQ());
+});
 
 // ─── NAVEGACIÓN ────────────────────────────────────────────────────
 const PANTALLAS = ['inicio','admin-login','juego','resultado','podio','participantes','admin'];
@@ -1169,14 +1207,17 @@ async function elimPart(row){
 }
 function eliminarPregunta(id){
   if(!confirm('¿Eliminar esta pregunta?')) return;
-  guardar(K.q, getQ().filter(q=>q.id!==id));
+  const qs=getQ().filter(q=>q.id!==id);
+  guardar(K.q,qs); _qCache=qs;
+  savePreguntasSheets(qs);
   renderAdmin();
 }
 function togglePregunta(id){
   const qs=getQ();
   const q=qs.find(q=>q.id===id);
   if(q) q.active=!q.active;
-  guardar(K.q,qs);
+  guardar(K.q,qs); _qCache=qs;
+  savePreguntasSheets(qs);
   renderAdmin();
 }
 function cambiarPass(){
@@ -1230,7 +1271,8 @@ function guardarPregunta(){
   } else {
     qs.push({id:uid(),text:texto,options:ops,correct:corrIdx,active:activa,fails:0});
   }
-  guardar(K.q,qs);
+  guardar(K.q,qs); _qCache=qs;
+  savePreguntasSheets(qs);
   cerrarModal();
   renderAdmin();
 }
