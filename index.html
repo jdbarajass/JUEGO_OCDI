@@ -350,6 +350,15 @@ textarea,input,select{font-family:inherit}
 .btn-m-save{flex:1;padding:12px;background:linear-gradient(135deg,#FFB81C,#e08800);color:#000;border:none;border-radius:8px;font-weight:400;font-size:20px;cursor:pointer;font-family:'Bebas Neue',sans-serif;letter-spacing:2px}
 .btn-m-cancel{flex:1;padding:12px;background:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;font-family:'Rajdhani',sans-serif}
 
+/* ── TEMPORIZADOR ── */
+.timer-ring{position:relative;width:38px;height:38px;flex-shrink:0}
+.timer-ring svg{width:38px;height:38px;transform:rotate(-90deg)}
+.timer-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:3.5}
+.timer-arc{fill:none;stroke:#FFB81C;stroke-width:3.5;stroke-dasharray:100 100;stroke-linecap:round;transition:stroke-dasharray 1s linear,stroke .3s}
+#timer-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;font-weight:900;font-family:'Rajdhani',sans-serif;color:#fff;line-height:1}
+.timer-urgente #timer-arc-el{stroke:#ff5555}
+.timer-urgente #timer-num{color:#ff5555}
+
 /* ── RESPONSIVE ── */
 @media(min-width:600px){
   .cancha{height:48vh}
@@ -486,6 +495,13 @@ textarea,input,select{font-family:inherit}
   <div class="pregunta-card">
     <div class="pregunta-header">
       <span class="badge-pregunta" id="badge-num">Pregunta 1</span>
+      <div class="timer-ring" id="timer-ring">
+        <svg viewBox="0 0 36 36">
+          <circle class="timer-bg" cx="18" cy="18" r="15.9"/>
+          <circle class="timer-arc" id="timer-arc-el" cx="18" cy="18" r="15.9"/>
+        </svg>
+        <span id="timer-num">12</span>
+      </div>
       <span class="badge-jugada" id="badge-jugada">⚽ Salida desde el portero</span>
     </div>
     <div class="pregunta-texto" id="pregunta-txt">Cargando…</div>
@@ -848,6 +864,44 @@ function iniciarPartido(){
   renderPregunta();
 }
 
+let _timerInterval = null;
+const TIMER_SEG = 12;
+
+function detenerTimer(){
+  clearInterval(_timerInterval);
+  _timerInterval = null;
+}
+
+function iniciarTimer(){
+  detenerTimer();
+  let restante = TIMER_SEG;
+  const numEl = document.getElementById('timer-num');
+  const arcEl = document.getElementById('timer-arc-el');
+  const ring  = document.getElementById('timer-ring');
+
+  function actualizar(){
+    if(numEl) numEl.textContent = restante;
+    if(arcEl) arcEl.style.strokeDasharray = `${(restante/TIMER_SEG)*100} 100`;
+    const urgente = restante <= 4;
+    if(arcEl) arcEl.style.stroke = urgente ? '#ff5555' : '#FFB81C';
+    if(numEl) numEl.style.color  = urgente ? '#ff5555' : '#fff';
+  }
+  actualizar();
+
+  _timerInterval = setInterval(()=>{
+    restante--;
+    actualizar();
+    if(restante <= 0){
+      detenerTimer();
+      if(!GS.respondido){
+        const q = GS.preguntas[GS.idx];
+        const nOpts = q.options.filter(o=>o&&o.trim()).length;
+        responder(Math.floor(Math.random()*nOpts));
+      }
+    }
+  }, 1000);
+}
+
 function renderPregunta(){
   const {preguntas,idx} = GS;
   const q = preguntas[idx];
@@ -870,11 +924,13 @@ function renderPregunta(){
     grid.appendChild(btn);
   });
   GS.respondido=false;
+  iniciarTimer();
 }
 
 function responder(sel){
   if(GS.respondido) return;
   GS.respondido=true;
+  detenerTimer();
 
   const q=GS.preguntas[GS.idx];
   const ok=(sel===q.correct);
