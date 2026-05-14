@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mundial de Preguntas – SDS</title>
+<style>
+/* ── RESET ── */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:#001f5b;color:#fff;overflow-x:hidden}
+.hidden{display:none!important}
+.screen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;width:100%}
+button{font-family:inherit;cursor:pointer}
+textarea,input,select{font-family:inherit}
+
+/* ── PANTALLA INICIO ── */
+#screen-inicio{
+  background:linear-gradient(160deg,#001040 0%,#002080 50%,#001040 100%);
+  padding:24px 20px 32px;justify-content:center;gap:18px;position:relative;overflow:hidden}
+#screen-inicio::before{content:'🏆';font-size:220px;position:absolute;opacity:.04;top:-40px;right:-50px;pointer-events:none}
+.badge-mundial{background:linear-gradient(135deg,#FFB81C,#e5a000);color:#001040;padding:5px 18px;
+  border-radius:20px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.inicio-titulo{text-align:center;font-size:clamp(26px,8vw,46px);font-weight:900;
+  color:#FFB81C;line-height:1.15;text-shadow:0 3px 14px rgba(0,0,0,.4)}
+.inicio-subtitulo{font-size:clamp(11px,3vw,14px);color:rgba(255,255,255,.55);text-align:center}
+.vs-row{display:flex;align-items:center;justify-content:center;gap:14px}
+.bandera{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;font-weight:700}
+.flag-co{width:72px;height:46px;border-radius:6px;
+  background:linear-gradient(to bottom,#FFB81C 33%,#003087 33%,#003087 67%,#CE1126 67%);
+  box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.flag-ar{width:72px;height:46px;border-radius:6px;
+  background:linear-gradient(to bottom,#74ACDF 33%,#fff 33%,#fff 67%,#74ACDF 67%);
+  box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.vs-bola{width:52px;height:52px;border-radius:50%;background:#FFB81C;color:#001040;
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;
+  box-shadow:0 4px 16px rgba(255,184,28,.5)}
+.card-form{background:rgba(255,255,255,.09);backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:22px;width:100%;max-width:400px}
+.card-form label{display:block;font-size:12px;color:rgba(255,255,255,.6);margin-bottom:7px;font-weight:700}
+.card-form input[type=text]{width:100%;padding:14px 16px;border:2px solid rgba(255,255,255,.25);
+  border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-size:16px;outline:none;
+  transition:border-color .2s}
+.card-form input:focus{border-color:#FFB81C}
+.card-form input::placeholder{color:rgba(255,255,255,.35)}
+.btn-inicio{width:100%;padding:16px;background:linear-gradient(135deg,#FFB81C,#e59500);
+  color:#001040;border:none;border-radius:12px;font-size:18px;font-weight:900;
+  margin-top:14px;transition:transform .1s,box-shadow .1s;
+  box-shadow:0 5px 22px rgba(255,184,28,.4);letter-spacing:.5px;text-transform:uppercase}
+.btn-inicio:active{transform:scale(.97)}
+.err-msg{color:#ff7b7b;font-size:12px;margin-top:6px;display:none}
+.links-row{display:flex;gap:20px;align-items:center}
+.link-nav{color:#FFB81C;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none}
+.link-nav:hover{text-decoration:underline}
+.footer-inst{text-align:center;font-size:11px;color:rgba(255,255,255,.4);line-height:1.7}
+.btn-admin-oculto{background:transparent;border:none;color:rgba(255,255,255,.1);
+  font-size:9px;padding:4px;margin-top:4px}
+
+/* ── ADMIN LOGIN ── */
+#screen-admin-login{background:#0f172a;justify-content:center;padding:24px;gap:20px}
+.card-dark{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:24px;
+  width:100%;max-width:360px}
+.admin-login-icon{font-size:44px;text-align:center}
+.admin-login-title{font-size:20px;font-weight:800;color:#FFB81C;text-align:center}
+.admin-login-sub{font-size:13px;color:#64748b;text-align:center}
+.card-dark label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px;font-weight:700}
+.card-dark input[type=password]{width:100%;padding:12px 14px;background:#0f172a;
+  border:1px solid #334155;border-radius:8px;color:#fff;font-size:15px;outline:none;
+  transition:border-color .2s}
+.card-dark input:focus{border-color:#FFB81C}
+.btn-ingresar{width:100%;padding:14px;background:linear-gradient(135deg,#FFB81C,#e59500);
+  color:#001040;border:none;border-radius:10px;font-size:16px;font-weight:900;
+  margin-top:12px;cursor:pointer}
+.btn-cancelar{width:100%;padding:12px;background:rgba(255,255,255,.08);color:#fff;
+  border:1px solid rgba(255,255,255,.2);border-radius:10px;font-size:15px;font-weight:600;
+  margin-top:8px;cursor:pointer}
+
+/* ── PANTALLA JUEGO ── */
+#screen-juego{background:#001040;justify-content:flex-start;padding:0}
+.game-header{background:rgba(0,0,0,.5);width:100%;display:flex;align-items:center;
+  justify-content:space-between;padding:8px 14px;font-size:12px;flex-shrink:0}
+.marcador{display:flex;align-items:center;gap:10px}
+.equipo-mini{display:flex;flex-direction:column;align-items:center;gap:2px}
+.banderita-co{width:30px;height:19px;border-radius:3px;
+  background:linear-gradient(to bottom,#FFB81C 33%,#003087 33%,#003087 67%,#CE1126 67%)}
+.banderita-ar{width:30px;height:19px;border-radius:3px;
+  background:linear-gradient(to bottom,#74ACDF 33%,#fff 33%,#fff 67%,#74ACDF 67%)}
+.marcador-sep{font-size:13px;color:#FFB81C;font-weight:900}
+.jugada-num{font-size:11px;color:rgba(255,255,255,.6)}
+.progress-bar{width:100%;height:5px;background:rgba(255,255,255,.12);flex-shrink:0}
+.progress-fill{height:100%;background:linear-gradient(90deg,#FFB81C,#e59500);
+  transition:width .6s ease;border-radius:0 3px 3px 0}
+
+/* CANCHA */
+.cancha-wrap{width:100%;flex-shrink:0;position:relative;overflow:hidden}
+.cancha{
+  width:100%;height:46vh;
+  background:repeating-linear-gradient(0deg,#1a6e1a,#1a6e1a 40px,#1e7a1e 40px,#1e7a1e 80px);
+  position:relative;border-left:3px solid rgba(255,255,255,.7);border-right:3px solid rgba(255,255,255,.7)}
+/* línea media */
+.cancha::before{content:'';position:absolute;top:50%;left:2%;right:2%;height:2px;
+  background:rgba(255,255,255,.65);z-index:1}
+/* círculo central */
+.circulo-central{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:14%;aspect-ratio:1;border:2px solid rgba(255,255,255,.65);border-radius:50%;z-index:1}
+/* punto central */
+.punto-central{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:5px;height:5px;background:rgba(255,255,255,.8);border-radius:50%;z-index:2}
+/* porterías */
+.porteria{position:absolute;left:50%;transform:translateX(-50%);width:26%;height:6%;
+  border:3px solid #fff;background:rgba(255,255,255,.12);z-index:2}
+.porteria-top{top:0;border-top:none;border-radius:0 0 6px 6px}
+.porteria-bot{bottom:0;border-bottom:none;border-radius:6px 6px 0 0}
+/* áreas */
+.area{position:absolute;left:50%;transform:translateX(-50%);width:48%;height:15%;
+  border:2px solid rgba(255,255,255,.55);background:rgba(255,255,255,.04);z-index:1}
+.area-top{top:0;border-top:none;border-radius:0 0 6px 6px}
+.area-bot{bottom:0;border-bottom:none;border-radius:6px 6px 0 0}
+/* jugadores */
+.jugador{position:absolute;width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:7px;font-weight:900;transform:translate(-50%,-50%);
+  border:2px solid rgba(255,255,255,.8);z-index:3;transition:transform .4s}
+.jco{background:#FFB81C;color:#001040;border-color:#001040}
+.jco-gk{background:#FF6600;color:#fff;border-color:#993d00}
+.jar{background:#74ACDF;color:#fff;border-color:#003087}
+.jar-gk{background:#003087;color:#fff;border-color:#002060}
+/* balón */
+#balon{position:absolute;width:22px;height:22px;
+  background:radial-gradient(circle at 35% 30%,#fff 0%,#ddd 55%,#aaa 100%);
+  border-radius:50%;border:2px solid #555;z-index:10;
+  transform:translate(-50%,-50%);
+  transition:top .9s cubic-bezier(.25,.46,.45,.94),left .9s cubic-bezier(.25,.46,.45,.94);
+  box-shadow:0 2px 8px rgba(0,0,0,.5)}
+#balon::after{content:'';position:absolute;top:3px;left:3px;
+  width:5px;height:5px;background:rgba(255,255,255,.7);border-radius:50%}
+/* etiqueta pase */
+#etiqueta-pase{position:absolute;background:rgba(255,255,255,.95);color:#001040;
+  padding:5px 14px;border-radius:20px;font-weight:800;font-size:12px;
+  transform:translate(-50%,-200%);z-index:20;opacity:0;
+  transition:opacity .3s;white-space:nowrap;pointer-events:none;
+  box-shadow:0 3px 10px rgba(0,0,0,.3)}
+
+/* TARJETA PREGUNTA */
+.pregunta-card{width:100%;flex:1;background:linear-gradient(180deg,#001a4d,#002080);
+  padding:14px 16px;display:flex;flex-direction:column;gap:9px;overflow:hidden}
+.pregunta-header{display:flex;align-items:center;justify-content:space-between}
+.badge-pregunta{background:#FFB81C;color:#001040;padding:3px 12px;border-radius:20px;
+  font-size:11px;font-weight:800}
+.badge-jugada{font-size:11px;color:rgba(255,255,255,.45);font-style:italic}
+.pregunta-texto{font-size:clamp(13px,4vw,16px);font-weight:700;line-height:1.4;color:#fff}
+.opciones-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-opcion{background:rgba(255,255,255,.09);border:2px solid rgba(255,255,255,.18);
+  border-radius:10px;color:#fff;padding:10px 8px;font-size:clamp(11px,3.2vw,13px);
+  font-weight:600;cursor:pointer;text-align:center;line-height:1.3;
+  transition:background .12s,border-color .12s,transform .1s}
+.btn-opcion:active{transform:scale(.95)}
+.btn-opcion.seleccionada{background:rgba(255,184,28,.25);border-color:#FFB81C}
+.btn-opcion:disabled{opacity:.65;cursor:not-allowed}
+.letra-opcion{font-weight:900;color:#FFB81C;margin-right:3px}
+
+/* ── PANTALLA RESULTADO ── */
+#screen-resultado{background:linear-gradient(160deg,#001040,#002080);
+  justify-content:center;padding:24px 20px;gap:14px;text-align:center}
+.res-icono{font-size:78px;animation:popIn .6s ease}
+@keyframes popIn{0%{transform:scale(0) rotate(-15deg)}65%{transform:scale(1.15)}100%{transform:scale(1)}}
+.res-titulo{font-size:clamp(22px,7vw,38px);font-weight:900;line-height:1.2}
+.res-titulo.gano{color:#FFB81C}
+.res-titulo.perdio{color:#ff7070}
+.res-mensaje{font-size:clamp(12px,3.5vw,15px);color:rgba(255,255,255,.8);
+  line-height:1.55;max-width:380px}
+.estado-pill{display:inline-block;padding:8px 26px;border-radius:30px;
+  font-weight:800;font-size:15px;text-transform:uppercase}
+.pill-campeon{background:linear-gradient(135deg,#FFB81C,#e59500);color:#001040}
+.pill-no{background:#dc2626;color:#fff}
+.score-card{background:rgba(255,255,255,.09);border-radius:16px;padding:20px;
+  width:100%;max-width:380px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.score-item{display:flex;flex-direction:column;align-items:center;gap:3px}
+.score-num{font-size:30px;font-weight:900;color:#FFB81C}
+.score-label{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px}
+.score-pct{font-size:52px;font-weight:900;color:#FFB81C}
+.info-participante{font-size:13px;color:rgba(255,255,255,.55);line-height:1.8}
+.btns-fila{display:flex;gap:10px;width:100%;max-width:380px}
+.btn-prim{flex:1;padding:14px;background:linear-gradient(135deg,#FFB81C,#e59500);
+  color:#001040;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer}
+.btn-sec{flex:1;padding:14px;background:rgba(255,255,255,.12);color:#fff;
+  border:1px solid rgba(255,255,255,.2);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
+
+/* ── ANIMACIÓN GOL / FALLO ── */
+.overlay-gol{position:fixed;inset:0;background:rgba(0,20,80,.92);z-index:150;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  animation:fadInOut 3.2s ease forwards;pointer-events:none}
+@keyframes fadInOut{0%{opacity:0}15%{opacity:1}80%{opacity:1}100%{opacity:0}}
+.gol-texto{font-size:clamp(50px,16vw,90px);font-weight:900;color:#FFB81C;
+  animation:zoomIn .5s ease;text-shadow:0 0 40px rgba(255,184,28,.8)}
+.fallo-texto{font-size:clamp(36px,12vw,64px);font-weight:900;color:#ff7070;animation:zoomIn .5s ease}
+@keyframes zoomIn{0%{transform:scale(0) rotate(-10deg)}100%{transform:scale(1)}}
+
+/* ── CONFETI ── */
+#confeti-wrap{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+.confeti{position:absolute;top:-12px;animation:caer linear forwards}
+@keyframes caer{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* ── PANTALLAS SECUNDARIAS ── */
+.screen-sec{background:linear-gradient(160deg,#001040,#002080);padding:20px;gap:18px}
+.screen-header{width:100%;max-width:560px;display:flex;align-items:center;gap:12px}
+.btn-volver{background:rgba(255,255,255,.12);border:none;color:#fff;
+  padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer}
+.screen-titulo{font-size:clamp(18px,5vw,28px);font-weight:900;color:#FFB81C}
+
+/* PODIO */
+.podio-row{display:flex;align-items:flex-end;justify-content:center;gap:8px;
+  width:100%;max-width:420px}
+.podio-item{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1}
+.podio-medal{font-size:30px}
+.podio-nombre{font-size:clamp(9px,2.8vw,12px);font-weight:700;text-align:center;
+  line-height:1.2;word-break:break-word}
+.podio-pct{font-size:18px;font-weight:900;color:#FFB81C}
+.podio-bloque{width:100%;border-radius:8px 8px 0 0;display:flex;align-items:center;
+  justify-content:center;padding:6px 0;font-weight:900;font-size:18px}
+.p1 .podio-bloque{background:#FFD700;color:#001040;height:80px}
+.p2 .podio-bloque{background:#C0C0C0;color:#001040;height:58px}
+.p3 .podio-bloque{background:#CD7F32;color:#fff;height:42px}
+
+/* TABLAS */
+.tabla-wrap{width:100%;max-width:560px;overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{background:rgba(255,255,255,.14);padding:8px 10px;text-align:left;
+  font-size:10px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.data-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.07)}
+.data-table tr:hover td{background:rgba(255,255,255,.04)}
+.badge-rank{display:inline-block;width:22px;height:22px;border-radius:50%;
+  background:rgba(255,255,255,.14);text-align:center;line-height:22px;font-weight:700}
+.ok{color:#4ade80;font-weight:700}.nok{color:#f87171;font-weight:700}
+.pct-col{color:#FFB81C;font-weight:800}
+
+/* BUSCADOR */
+.buscador{width:100%;max-width:560px;padding:12px 16px;
+  border:2px solid rgba(255,255,255,.18);border-radius:10px;
+  background:rgba(255,255,255,.09);color:#fff;font-size:15px;outline:none}
+.buscador::placeholder{color:rgba(255,255,255,.35)}
+.buscador:focus{border-color:#FFB81C}
+.count-txt{font-size:12px;color:rgba(255,255,255,.45)}
+
+/* ── ADMIN ── */
+#screen-admin{background:#0f172a;padding:20px;gap:20px;align-items:flex-start}
+.admin-card{background:#1e293b;border-radius:12px;padding:18px;width:100%;max-width:620px}
+.admin-card-title{font-size:13px;font-weight:800;color:#FFB81C;
+  margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{background:#0f172a;border-radius:8px;padding:12px;text-align:center}
+.stat-n{font-size:26px;font-weight:900;color:#FFB81C}.stat-l{font-size:11px;color:#64748b}
+.a-input{width:100%;padding:10px 12px;background:#0f172a;border:1px solid #334155;
+  border-radius:8px;color:#fff;font-size:14px;margin-bottom:8px;outline:none}
+.a-input:focus{border-color:#FFB81C}
+.a-label{font-size:12px;color:#94a3b8;margin-bottom:4px;display:block}
+.btn-a-add{padding:10px 18px;background:#FFB81C;color:#001040;border:none;
+  border-radius:8px;font-weight:800;font-size:14px;cursor:pointer;margin-bottom:12px}
+.btn-a-del{padding:5px 10px;background:#dc2626;color:#fff;border:none;
+  border-radius:6px;font-size:12px;cursor:pointer;font-weight:600}
+.btn-a-edit{padding:5px 10px;background:#0284c7;color:#fff;border:none;
+  border-radius:6px;font-size:12px;cursor:pointer;font-weight:600}
+.btn-a-tog{padding:5px 10px;background:#64748b;color:#fff;border:none;
+  border-radius:6px;font-size:11px;cursor:pointer;font-weight:600}
+.btn-a-tog.on{background:#16a34a}
+.btn-borrar-todos{padding:10px 16px;background:#dc2626;color:#fff;border:none;
+  border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px}
+.q-item{background:#0f172a;border-radius:8px;padding:10px 12px;
+  margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.q-item-txt{font-size:13px;line-height:1.4;flex:1}
+.q-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.pill-on{background:#166534;color:#4ade80;padding:2px 8px;border-radius:10px;
+  font-size:10px;font-weight:700}
+.pill-off{background:#7f1d1d;color:#f87171;padding:2px 8px;border-radius:10px;
+  font-size:10px;font-weight:700}
+.pill-fails{background:#1e293b;color:#94a3b8;padding:2px 8px;border-radius:10px;
+  font-size:10px;font-weight:600}
+.q-btns{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.fallada-item{background:#0f172a;border-radius:8px;padding:10px 12px;
+  margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fallada-txt{font-size:12px;flex:1;color:rgba(255,255,255,.8)}
+.pill-fallo{background:#7f1d1d;color:#f87171;padding:3px 10px;border-radius:20px;
+  font-size:12px;font-weight:800;white-space:nowrap}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:#1e293b;border-radius:16px;padding:22px;width:100%;
+  max-width:420px;max-height:88vh;overflow-y:auto}
+.modal-title{font-size:17px;font-weight:800;color:#FFB81C;margin-bottom:16px}
+.correct-row{display:flex;align-items:center;gap:8px;padding:8px 12px;
+  background:#0f172a;border-radius:6px;margin-bottom:6px;cursor:pointer;font-size:13px}
+.correct-row input{cursor:pointer;width:15px;height:15px}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+.btn-m-save{flex:1;padding:11px;background:#FFB81C;color:#001040;border:none;
+  border-radius:8px;font-weight:900;font-size:14px;cursor:pointer}
+.btn-m-cancel{flex:1;padding:11px;background:rgba(255,255,255,.08);color:#fff;
+  border:1px solid rgba(255,255,255,.2);border-radius:8px;font-weight:600;
+  font-size:14px;cursor:pointer}
+
+/* ── RESPONSIVE ── */
+@media(min-width:600px){
+  .cancha{height:48vh}
+  .opciones-grid{grid-template-columns:1fr 1fr}
+}
+@media(min-width:900px){
+  .cancha{height:52vh}
+  .pregunta-card{padding:18px 24px;gap:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- CONFETI -->
+<div id="confeti-wrap"></div>
+
+<!-- ══════════════════════════ INICIO ══════════════════════════ -->
+<div id="screen-inicio" class="screen">
+  <span class="badge-mundial">⚽ Mundial 2026 · Colombia vs Argentina</span>
+  <div class="inicio-titulo">Mundial de<br>Preguntas</div>
+  <div class="inicio-subtitulo">Secretaría Distrital de Salud</div>
+
+  <div class="vs-row">
+    <div class="bandera"><div class="flag-co"></div><span>COLOMBIA</span></div>
+    <div class="vs-bola">VS</div>
+    <div class="bandera"><div class="flag-ar"></div><span>ARGENTINA</span></div>
+  </div>
+
+  <div class="card-form">
+    <label>Nombre Completo *</label>
+    <input type="text" id="inp-nombre" placeholder="Ej: María García López"
+           autocomplete="name" autocorrect="off"
+           onkeydown="if(event.key==='Enter')iniciarPartido()">
+    <div class="err-msg" id="err-nombre">⚠ Escribe tu nombre y apellido completos.</div>
+    <button class="btn-inicio" onclick="iniciarPartido()">⚽ Iniciar Partido</button>
+  </div>
+
+  <div class="links-row">
+    <span class="link-nav" onclick="ir('podio')">🏆 Podio</span>
+    <span class="link-nav" onclick="ir('participantes')">📋 Participantes</span>
+  </div>
+
+  <div class="footer-inst">
+    <strong>Secretaría Distrital de Salud</strong><br>
+    Oficina de Control Disciplinario Interno
+  </div>
+  <button class="btn-admin-oculto" onclick="irAdminLogin()" title="Admin">⚙</button>
+</div>
+
+<!-- ══════════════════════════ ADMIN LOGIN ══════════════════════════ -->
+<div id="screen-admin-login" class="screen hidden">
+  <div class="admin-login-icon">🔐</div>
+  <div class="admin-login-title">Panel Administrador</div>
+  <div class="admin-login-sub">Secretaría Distrital de Salud · OCDI</div>
+  <div class="card-dark">
+    <label>Contraseña</label>
+    <input type="password" id="inp-pass" placeholder="Contraseña"
+           onkeydown="if(event.key==='Enter')verificarAdmin()">
+    <div class="err-msg" id="err-pass" style="display:none">Contraseña incorrecta.</div>
+    <button class="btn-ingresar" onclick="verificarAdmin()">Acceder</button>
+    <button class="btn-cancelar" onclick="ir('inicio')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════ JUEGO ══════════════════════════ -->
+<div id="screen-juego" class="screen hidden">
+
+  <!-- Header -->
+  <div class="game-header">
+    <div class="marcador">
+      <div class="equipo-mini">
+        <div class="banderita-co"></div>
+        <span style="font-size:9px">COL</span>
+      </div>
+      <div class="marcador-sep" id="marcador-txt">⚽ 1/10</div>
+      <div class="equipo-mini">
+        <div class="banderita-ar"></div>
+        <span style="font-size:9px">ARG</span>
+      </div>
+    </div>
+    <div class="jugada-num" id="nombre-mini"></div>
+  </div>
+
+  <!-- Progreso -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+
+  <!-- Cancha -->
+  <div class="cancha-wrap">
+    <div class="cancha" id="cancha">
+      <div class="circulo-central"></div>
+      <div class="punto-central"></div>
+      <div class="porteria porteria-top"></div>
+      <div class="porteria porteria-bot"></div>
+      <div class="area area-top"></div>
+      <div class="area area-bot"></div>
+
+      <!-- Jugadores Colombia (amarillo) bottom -->
+      <div class="jugador jco-gk" style="top:91%;left:50%">1</div>
+      <div class="jugador jco" style="top:80%;left:22%">3</div>
+      <div class="jugador jco" style="top:80%;left:42%">4</div>
+      <div class="jugador jco" style="top:80%;left:62%">5</div>
+      <div class="jugador jco" style="top:80%;left:82%">2</div>
+      <div class="jugador jco" style="top:67%;left:18%">7</div>
+      <div class="jugador jco" style="top:67%;left:50%">8</div>
+      <div class="jugador jco" style="top:67%;left:82%">11</div>
+      <div class="jugador jco" style="top:56%;left:30%">10</div>
+      <div class="jugador jco" style="top:56%;left:70%">6</div>
+      <div class="jugador jco" style="top:50%;left:50%">9</div>
+
+      <!-- Jugadores Argentina (azul celeste) top -->
+      <div class="jugador jar-gk" style="top:9%;left:50%">1</div>
+      <div class="jugador jar" style="top:20%;left:22%">4</div>
+      <div class="jugador jar" style="top:20%;left:42%">6</div>
+      <div class="jugador jar" style="top:20%;left:62%">13</div>
+      <div class="jugador jar" style="top:20%;left:82%">3</div>
+      <div class="jugador jar" style="top:33%;left:18%">7</div>
+      <div class="jugador jar" style="top:33%;left:50%">5</div>
+      <div class="jugador jar" style="top:33%;left:82%">8</div>
+      <div class="jugador jar" style="top:43%;left:30%">11</div>
+      <div class="jugador jar" style="top:43%;left:70%">22</div>
+      <div class="jugador jar" style="top:49%;left:50%">10</div>
+
+      <!-- Balón -->
+      <div id="balon"></div>
+      <!-- Etiqueta pase -->
+      <div id="etiqueta-pase"></div>
+    </div>
+  </div>
+
+  <!-- Tarjeta pregunta -->
+  <div class="pregunta-card">
+    <div class="pregunta-header">
+      <span class="badge-pregunta" id="badge-num">Pregunta 1</span>
+      <span class="badge-jugada" id="badge-jugada">⚽ Salida desde el portero</span>
+    </div>
+    <div class="pregunta-texto" id="pregunta-txt">Cargando…</div>
+    <div class="opciones-grid" id="opciones-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ RESULTADO ══════════════════════════ -->
+<div id="screen-resultado" class="screen hidden">
+  <div class="res-icono" id="res-icono">🏆</div>
+  <div class="res-titulo" id="res-titulo"></div>
+  <div class="res-mensaje" id="res-mensaje"></div>
+  <div class="estado-pill" id="res-estado"></div>
+
+  <div class="score-card">
+    <div class="score-item" style="grid-column:1/-1">
+      <div class="score-pct" id="res-pct"></div>
+      <div class="score-label">Puntaje Final</div>
+    </div>
+    <div class="score-item">
+      <div class="score-num" id="res-correctas" style="color:#4ade80"></div>
+      <div class="score-label">Correctas</div>
+    </div>
+    <div class="score-item">
+      <div class="score-num" id="res-incorrectas" style="color:#f87171"></div>
+      <div class="score-label">Incorrectas</div>
+    </div>
+  </div>
+
+  <div class="info-participante" id="res-info"></div>
+
+  <div class="btns-fila">
+    <button class="btn-sec" onclick="ir('inicio')">🏠 Inicio</button>
+    <button class="btn-prim" onclick="ir('podio')">🏆 Podio</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════ PODIO ══════════════════════════ -->
+<div id="screen-podio" class="screen screen-sec hidden">
+  <div class="screen-header">
+    <button class="btn-volver" onclick="ir('inicio')">← Volver</button>
+    <div class="screen-titulo">🏆 Podio de Campeones</div>
+  </div>
+  <div class="podio-row" id="podio-row"></div>
+  <div class="tabla-wrap">
+    <div style="font-size:13px;font-weight:700;color:#FFB81C;margin-bottom:10px">📊 Ranking General</div>
+    <table class="data-table" id="ranking-table">
+      <thead><tr><th>#</th><th>Nombre</th><th>%</th><th>✓</th><th>✗</th><th>Estado</th></tr></thead>
+      <tbody id="ranking-tbody"></tbody>
+    </table>
+  </div>
+  <div id="podio-resumen" style="width:100%;max-width:560px"></div>
+</div>
+
+<!-- ══════════════════════════ PARTICIPANTES ══════════════════════════ -->
+<div id="screen-participantes" class="screen screen-sec hidden">
+  <div class="screen-header">
+    <button class="btn-volver" onclick="ir('inicio')">← Volver</button>
+    <div class="screen-titulo">📋 Participantes</div>
+  </div>
+  <input class="buscador" id="buscador" type="text"
+         placeholder="🔍 Buscar por nombre…" oninput="filtrar()">
+  <div class="count-txt" id="count-txt"></div>
+  <div class="tabla-wrap">
+    <table class="data-table" id="part-table">
+      <thead><tr><th>Nombre</th><th>%</th><th>✓</th><th>✗</th><th>Estado</th><th>Fecha</th></tr></thead>
+      <tbody id="part-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════════════════ ADMIN ══════════════════════════ -->
+<div id="screen-admin" class="screen hidden" style="align-items:flex-start">
+  <div class="screen-header" style="max-width:620px">
+    <button class="btn-volver" onclick="ir('inicio')">← Salir</button>
+    <div class="screen-titulo">⚙️ Administrador</div>
+  </div>
+
+  <!-- Métricas -->
+  <div class="admin-card">
+    <div class="admin-card-title">📊 Métricas Generales</div>
+    <div class="stat-grid" id="admin-stats"></div>
+  </div>
+
+  <!-- Preguntas -->
+  <div class="admin-card">
+    <div class="admin-card-title">❓ Banco de Preguntas</div>
+    <button class="btn-a-add" onclick="abrirModal(null)">➕ Nueva Pregunta</button>
+    <div id="lista-preguntas"></div>
+  </div>
+
+  <!-- Preguntas más falladas -->
+  <div class="admin-card">
+    <div class="admin-card-title">❌ Preguntas Más Falladas</div>
+    <div id="pregs-falladas"></div>
+  </div>
+
+  <!-- Participantes -->
+  <div class="admin-card">
+    <div class="admin-card-title">👥 Participantes</div>
+    <button class="btn-borrar-todos" onclick="borrarTodos()">🗑 Borrar Todos los Registros</button>
+    <div class="tabla-wrap">
+      <table class="data-table">
+        <thead><tr><th>Nombre</th><th>%</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+        <tbody id="admin-part-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Últimos -->
+  <div class="admin-card">
+    <div class="admin-card-title">🕒 Últimos Participantes</div>
+    <div id="ultimos-part"></div>
+  </div>
+
+  <!-- Config -->
+  <div class="admin-card">
+    <div class="admin-card-title">🔑 Configuración</div>
+    <span class="a-label">Cambiar contraseña de administrador</span>
+    <input class="a-input" type="password" id="inp-new-pass" placeholder="Nueva contraseña (mín. 4 chars)">
+    <button class="btn-a-add" onclick="cambiarPass()">💾 Guardar Contraseña</button>
+  </div>
+</div>
+
+<!-- Modal Pregunta -->
+<div class="modal-overlay hidden" id="modal-preg">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-titulo">Nueva Pregunta</div>
+    <input type="hidden" id="edit-id">
+
+    <span class="a-label">Pregunta *</span>
+    <textarea class="a-input" id="q-texto" rows="3" placeholder="Escribe la pregunta…" style="resize:vertical"></textarea>
+
+    <span class="a-label">Opción A *</span>
+    <input class="a-input" type="text" id="q-op0" placeholder="Opción A">
+    <span class="a-label">Opción B *</span>
+    <input class="a-input" type="text" id="q-op1" placeholder="Opción B">
+    <span class="a-label">Opción C</span>
+    <input class="a-input" type="text" id="q-op2" placeholder="Opción C (opcional)">
+    <span class="a-label">Opción D</span>
+    <input class="a-input" type="text" id="q-op3" placeholder="Opción D (opcional)">
+
+    <span class="a-label">Respuesta Correcta *</span>
+    <select class="a-input" id="q-correcta" style="margin-bottom:10px">
+      <option value="0">A</option><option value="1">B</option>
+      <option value="2">C</option><option value="3">D</option>
+    </select>
+
+    <label class="correct-row">
+      <input type="checkbox" id="q-activa" checked>
+      <span>Pregunta Activa</span>
+    </label>
+
+    <div class="modal-btns">
+      <button class="btn-m-save" onclick="guardarPregunta()">💾 Guardar</button>
+      <button class="btn-m-cancel" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ JAVASCRIPT ══════════════════════════ -->
+<script>
+// ─── STORAGE ────────────────────────────────────────────────────────
+const K = { q:'mun_preguntas', p:'mun_participantes', pass:'mun_pass' };
+const PASS_DEFAULT = 'SDS2026';
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2) }
+function leer(k){ try{ return JSON.parse(localStorage.getItem(k)) }catch{return null} }
+function guardar(k,v){ localStorage.setItem(k,JSON.stringify(v)) }
+function getQ(){ return leer(K.q)||PREGUNTAS_DEFAULT }
+function getP(){ return leer(K.p)||[] }
+function getPass(){ return leer(K.pass)||PASS_DEFAULT }
+
+const PREGUNTAS_DEFAULT = [
+  { id:uid(), active:true, fails:0,
+    text:'¿Cuál ley establece el Código General Disciplinario vigente en Colombia?',
+    options:['Ley 734 de 2002','Ley 1952 de 2019','Ley 2094 de 2021','Decreto 262 de 2000'], correct:1 },
+  { id:uid(), active:true, fails:0,
+    text:'¿Cuál es la garantía fundamental que protege al servidor público investigado en un proceso disciplinario?',
+    options:['Derecho al trabajo','Derecho de petición','Debido proceso','Derecho a la educación'], correct:2 },
+  { id:uid(), active:true, fails:0,
+    text:'¿Cuál de las siguientes es la sanción disciplinaria más grave?',
+    options:['Amonestación escrita','Multa económica','Suspensión del cargo','Destitución e inhabilidad general'], correct:3 },
+  { id:uid(), active:true, fails:0,
+    text:'¿Qué principio disciplinario establece que no puede existir falta sin ley previa que la defina?',
+    options:['Proporcionalidad','Legalidad','Celeridad','Eficacia'], correct:1 },
+  { id:uid(), active:true, fails:0,
+    text:'¿Cuántas instancias tiene el proceso disciplinario ordinario en Colombia?',
+    options:['Una','Dos','Tres','Cuatro'], correct:1 },
+  { id:uid(), active:true, fails:0,
+    text:'¿A qué entidad pertenece la Oficina de Control Disciplinario Interno (OCDI)?',
+    options:['Procuraduría General','Ministerio de Salud','Secretaría Distrital de Salud de Bogotá','Contraloría Distrital'], correct:2 },
+  { id:uid(), active:true, fails:0,
+    text:'¿Cuál es el término general de caducidad de la acción disciplinaria?',
+    options:['1 año','3 años','5 años','10 años'], correct:2 },
+  { id:uid(), active:true, fails:0,
+    text:'¿Qué tipo de falta disciplinaria da lugar a la sanción más severa?',
+    options:['Falta leve','Falta grave','Falta gravísima','Falta administrativa'], correct:2 },
+  { id:uid(), active:true, fails:0,
+    text:'¿Cuál es la función principal de la Oficina de Control Disciplinario Interno?',
+    options:['Gestionar el presupuesto','Contratar personal','Investigar y sancionar faltas disciplinarias','Auditar estados financieros'], correct:2 },
+  { id:uid(), active:true, fails:0,
+    text:'¿Qué es la indagación preliminar en el proceso disciplinario?',
+    options:['La sanción definitiva','La etapa de formulación de cargos','La fase inicial para verificar si hay mérito para investigar','El recurso de apelación'], correct:2 },
+];
+
+// Inicializar storage
+if(!leer(K.q)) guardar(K.q, PREGUNTAS_DEFAULT);
+if(!leer(K.p)) guardar(K.p, []);
+
+// ─── NAVEGACIÓN ────────────────────────────────────────────────────
+const PANTALLAS = ['inicio','admin-login','juego','resultado','podio','participantes','admin'];
+function ir(nombre){
+  PANTALLAS.forEach(p=>{ document.getElementById('screen-'+p).classList.add('hidden') });
+  document.getElementById('screen-'+nombre).classList.remove('hidden');
+  window.scrollTo(0,0);
+  if(nombre==='podio') renderPodio();
+  if(nombre==='participantes') renderParticipantes();
+  if(nombre==='admin') renderAdmin();
+}
+function irAdminLogin(){
+  document.getElementById('inp-pass').value='';
+  document.getElementById('err-pass').style.display='none';
+  ir('admin-login');
+}
+function verificarAdmin(){
+  if(document.getElementById('inp-pass').value===getPass()){
+    ir('admin');
+  } else {
+    document.getElementById('err-pass').style.display='block';
+  }
+}
+
+// ─── ESTADO DEL JUEGO ──────────────────────────────────────────────
+let GS = {};
+
+const PASES = ['¡Buen pase!','¡Pase largo!','¡Cambio de frente!','¡Pase corto!',
+               '¡Habilitación!','¡En profundidad!','¡Pared!','¡Primer toque!',
+               '¡Triangulación!','¡Al espacio!','¡Pelota dividida!','¡Jugada colectiva!'];
+
+const JUGADAS = ['Salida desde el portero','Primer pase defensivo','Construcción en zona baja',
+                 'Salida al mediocampo','Pase entre líneas','Zona de mediocampo',
+                 'Presión en campo rival','Entrada al área','Posición de remate',
+                 'Último pase antes del remate','Definición final'];
+
+// Posiciones del balón (top % en la cancha, de abajo hacia arriba)
+function calcularPosiciones(n){
+  const ini=89, fin=11;
+  const step=(ini-fin)/n;
+  return Array.from({length:n+1},(_,i)=>+(ini-i*step).toFixed(1));
+}
+// Posiciones X con variación natural
+const POS_X = [50,35,65,45,55,35,65,50,40,60,50];
+
+function iniciarPartido(){
+  const nombre = document.getElementById('inp-nombre').value.trim();
+  if(nombre.split(/\s+/).filter(Boolean).length < 2){
+    document.getElementById('err-nombre').style.display='block'; return;
+  }
+  document.getElementById('err-nombre').style.display='none';
+
+  const activas = getQ().filter(q=>q.active);
+  if(activas.length===0){
+    alert('No hay preguntas activas. El administrador debe configurarlas.');
+    return;
+  }
+  const mezcla = activas.sort(()=>Math.random()-.5).slice(0,Math.min(10,activas.length));
+
+  GS = {
+    nombre, preguntas:mezcla, idx:0,
+    respuestas:[], correctas:0, incorrectas:0,
+    respondido:false,
+    posiciones: calcularPosiciones(mezcla.length),
+  };
+
+  document.getElementById('nombre-mini').textContent = nombre.split(' ')[0];
+  ir('juego');
+  posicionarBalon(0, false);
+  renderPregunta();
+}
+
+function renderPregunta(){
+  const {preguntas,idx} = GS;
+  const q = preguntas[idx];
+  const total = preguntas.length;
+
+  document.getElementById('marcador-txt').textContent = `⚽ ${idx+1}/${total}`;
+  document.getElementById('badge-num').textContent = `Pregunta ${idx+1}`;
+  document.getElementById('badge-jugada').textContent = '⚽ '+( JUGADAS[Math.min(idx,JUGADAS.length-1)] );
+  document.getElementById('progress-fill').style.width = `${(idx/total)*100}%`;
+  document.getElementById('pregunta-txt').textContent = q.text;
+
+  const grid = document.getElementById('opciones-grid');
+  grid.innerHTML='';
+  const letras=['A','B','C','D'];
+  q.options.filter(o=>o&&o.trim()).forEach((op,i)=>{
+    const btn=document.createElement('button');
+    btn.className='btn-opcion';
+    btn.innerHTML=`<span class="letra-opcion">${letras[i]}.</span>${op}`;
+    btn.onclick=()=>responder(i);
+    grid.appendChild(btn);
+  });
+  GS.respondido=false;
+}
+
+function responder(sel){
+  if(GS.respondido) return;
+  GS.respondido=true;
+
+  const q=GS.preguntas[GS.idx];
+  const ok=(sel===q.correct);
+  GS.respuestas.push({qId:q.id, sel, ok});
+  if(ok) GS.correctas++; else GS.incorrectas++;
+
+  document.querySelectorAll('.btn-opcion').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===sel) b.classList.add('seleccionada');
+  });
+
+  const pase=PASES[Math.floor(Math.random()*PASES.length)];
+  mostrarEtiqueta(pase);
+  posicionarBalon(GS.idx+1, true);
+
+  setTimeout(()=>{
+    ocultarEtiqueta();
+    GS.idx++;
+    if(GS.idx>=GS.preguntas.length){
+      setTimeout(mostrarResultado, 500);
+    } else {
+      renderPregunta();
+    }
+  }, 1300);
+}
+
+function posicionarBalon(n, animar){
+  const balon=document.getElementById('balon');
+  const pos=GS.posiciones||calcularPosiciones(10);
+  const top=pos[Math.min(n,pos.length-1)];
+  const xi=Math.min(n,POS_X.length-1);
+  const jitter=(Math.random()-.5)*8;
+  balon.style.transition=animar
+    ? 'top .9s cubic-bezier(.25,.46,.45,.94),left .9s cubic-bezier(.25,.46,.45,.94)'
+    : 'none';
+  balon.style.top=top+'%';
+  balon.style.left=(POS_X[xi]+jitter)+'%';
+}
+
+function mostrarEtiqueta(txt){
+  const e=document.getElementById('etiqueta-pase');
+  const b=document.getElementById('balon');
+  e.textContent=txt;
+  e.style.top=(parseFloat(b.style.top||'50')-8)+'%';
+  e.style.left=b.style.left||'50%';
+  e.style.opacity='1';
+}
+function ocultarEtiqueta(){ document.getElementById('etiqueta-pase').style.opacity='0'; }
+
+// ─── RESULTADO ─────────────────────────────────────────────────────
+function mostrarResultado(){
+  const {correctas,incorrectas,preguntas,nombre,respuestas} = GS;
+  const total=preguntas.length;
+  const pct=Math.round((correctas/total)*100);
+  const aprobado=pct>=70;
+  const ahora=new Date();
+
+  // Guardar participante
+  const part={
+    id:uid(), name:nombre, score:pct, correct:correctas,
+    incorrect:incorrectas, total, approved:aprobado,
+    date:ahora.toISOString(), answers:respuestas
+  };
+  const ps=getP(); ps.push(part); guardar(K.p,ps);
+
+  // Actualizar fallos por pregunta
+  const qs=getQ();
+  respuestas.forEach(r=>{
+    if(!r.ok){
+      const q=qs.find(q=>q.id===r.qId);
+      if(q) q.fails=(q.fails||0)+1;
+    }
+  });
+  guardar(K.q,qs);
+
+  ir('resultado');
+
+  const fmt=d=>d.toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric',
+    hour:'2-digit',minute:'2-digit'});
+
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-correctas').textContent=correctas;
+  document.getElementById('res-incorrectas').textContent=incorrectas;
+  document.getElementById('res-info').innerHTML=
+    `<strong style="color:#fff">${esc(nombre)}</strong><br>${fmt(ahora)}`;
+
+  if(aprobado){
+    document.getElementById('res-icono').textContent='🏆';
+    document.getElementById('res-titulo').className='res-titulo gano';
+    document.getElementById('res-titulo').textContent='¡Gooooool!';
+    document.getElementById('res-mensaje').textContent=
+      '¡Ganaste el Mundial de Preguntas de la Secretaría Distrital de Salud! Elaborado por la Oficina de Control Disciplinario Interno.';
+    document.getElementById('res-estado').className='estado-pill pill-campeon';
+    document.getElementById('res-estado').textContent='🏆 Campeón / Aprobado';
+    setTimeout(()=>confeti(),400);
+    animGol();
+  } else {
+    document.getElementById('res-icono').textContent='😔';
+    document.getElementById('res-titulo').className='res-titulo perdio';
+    document.getElementById('res-titulo').textContent='Se fue por fuera...';
+    document.getElementById('res-mensaje').textContent=
+      'No anotaste el gol. Inténtalo de nuevo en el próximo Mundial del 2030.';
+    document.getElementById('res-estado').className='estado-pill pill-no';
+    document.getElementById('res-estado').textContent='❌ No Aprobado';
+    animFallo();
+  }
+}
+
+// ─── ANIMACIONES ───────────────────────────────────────────────────
+function animGol(){
+  const el=document.createElement('div');
+  el.className='overlay-gol';
+  el.innerHTML=`<div class="gol-texto">⚽ GOOOOOOL!</div>
+    <div style="font-size:20px;color:#fff;margin-top:10px">¡Colombia anotó! 🇨🇴</div>
+    <div style="font-size:42px;margin-top:8px">🎉🏆🎊</div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),3200);
+}
+function animFallo(){
+  const el=document.createElement('div');
+  el.className='overlay-gol';
+  el.style.background='rgba(30,0,0,.9)';
+  el.innerHTML=`<div class="fallo-texto">😢 ¡Afuera!</div>
+    <div style="font-size:18px;color:rgba(255,255,255,.75);margin-top:10px">El balón se fue por fuera del arco</div>
+    <div style="font-size:42px;margin-top:8px">🧤🇦🇷❌</div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),3200);
+}
+function confeti(){
+  const c=document.getElementById('confeti-wrap');
+  const cols=['#FFB81C','#003087','#CE1126','#ffffff','#4ade80','#74ACDF','#FF6600'];
+  for(let i=0;i<90;i++){
+    const p=document.createElement('div');
+    p.className='confeti';
+    p.style.left=Math.random()*100+'vw';
+    p.style.background=cols[Math.floor(Math.random()*cols.length)];
+    p.style.width=(Math.random()*10+5)+'px';
+    p.style.height=(Math.random()*10+5)+'px';
+    p.style.borderRadius=Math.random()>.5?'50%':'2px';
+    p.style.animationDuration=(Math.random()*2+1.4)+'s';
+    p.style.animationDelay=(Math.random()*1.8)+'s';
+    c.appendChild(p);
+  }
+  setTimeout(()=>c.innerHTML='',5000);
+}
+
+// ─── PODIO ─────────────────────────────────────────────────────────
+function renderPodio(){
+  const ps=getP().sort((a,b)=>b.score-a.score||a.incorrect-b.incorrect||(new Date(a.date)-new Date(b.date)));
+
+  // Top 3 visual
+  const row=document.getElementById('podio-row');
+  row.innerHTML='';
+  if(ps.length===0){
+    row.innerHTML='<p style="color:rgba(255,255,255,.45);font-size:14px">Aún no hay participantes.</p>';
+  } else {
+    const med=['🥇','🥈','🥉'];
+    const cls=['p1','p2','p3'];
+    const ord=[1,0,2]; // visual: 2° izq, 1° centro, 3° der
+    ord.forEach(i=>{
+      const p=ps[i];
+      const div=document.createElement('div');
+      div.className='podio-item '+cls[i];
+      if(p){
+        div.innerHTML=`<div class="podio-medal">${med[i]}</div>
+          <div class="podio-nombre">${esc(p.name)}</div>
+          <div class="podio-pct">${p.score}%</div>
+          <div class="podio-bloque">${i+1}°</div>`;
+      } else {
+        div.innerHTML=`<div class="podio-medal" style="opacity:.3">${med[i]}</div>
+          <div class="podio-nombre" style="opacity:.3">—</div>
+          <div class="podio-bloque" style="opacity:.3">${i+1}°</div>`;
+      }
+      row.appendChild(div);
+    });
+  }
+
+  // Ranking completo
+  const tbody=document.getElementById('ranking-tbody');
+  tbody.innerHTML='';
+  const med=['🥇','🥈','🥉'];
+  ps.forEach((p,i)=>{
+    const d=new Date(p.date).toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'2-digit'});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><span class="badge-rank">${med[i]||i+1}</span></td>
+      <td>${esc(p.name)}</td>
+      <td class="pct-col">${p.score}%</td>
+      <td class="ok">${p.correct}</td>
+      <td class="nok">${p.incorrect}</td>
+      <td class="${p.approved?'ok':'nok'}">${p.approved?'✅':'❌'}</td>`;
+    tbody.appendChild(tr);
+  });
+  if(ps.length===0) tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,.35);padding:18px">Sin participantes aún</td></tr>';
+
+  // Resumen estadístico
+  if(ps.length>0){
+    const aprobados=ps.filter(p=>p.approved).length;
+    const avg=Math.round(ps.reduce((s,p)=>s+p.score,0)/ps.length);
+    document.getElementById('podio-resumen').innerHTML=`
+      <div style="background:rgba(255,255,255,.05);border-radius:10px;padding:14px;
+        margin-top:10px;font-size:13px;color:rgba(255,255,255,.65);line-height:1.9">
+        <strong style="color:#FFB81C">📊 Estadísticas Generales</strong><br>
+        Total participantes: <strong>${ps.length}</strong> &nbsp;·&nbsp;
+        Promedio: <strong>${avg}%</strong><br>
+        Aprobados: <strong style="color:#4ade80">${aprobados}</strong> &nbsp;·&nbsp;
+        No aprobados: <strong style="color:#f87171">${ps.length-aprobados}</strong> &nbsp;·&nbsp;
+        Aprobación: <strong>${Math.round(aprobados/ps.length*100)}%</strong>
+      </div>`;
+  }
+}
+
+// ─── PARTICIPANTES ─────────────────────────────────────────────────
+function renderParticipantes(filtro=''){
+  const todos=getP();
+  const filt=filtro?todos.filter(p=>p.name.toLowerCase().includes(filtro.toLowerCase())):todos;
+  const ord=[...filt].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById('count-txt').textContent=`${filt.length} de ${todos.length} participante(s)`;
+  const tbody=document.getElementById('part-tbody');
+  tbody.innerHTML='';
+  ord.forEach(p=>{
+    const d=new Date(p.date).toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${esc(p.name)}</td>
+      <td class="pct-col">${p.score}%</td>
+      <td class="ok">${p.correct}</td>
+      <td class="nok">${p.incorrect}</td>
+      <td class="${p.approved?'ok':'nok'}">${p.approved?'✅ Aprobado':'❌ No aprobado'}</td>
+      <td style="font-size:11px;color:rgba(255,255,255,.45)">${d}</td>`;
+    tbody.appendChild(tr);
+  });
+  if(ord.length===0) tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,.35);padding:18px">Sin resultados</td></tr>';
+}
+function filtrar(){ renderParticipantes(document.getElementById('buscador').value); }
+
+// ─── ADMIN ─────────────────────────────────────────────────────────
+function renderAdmin(){
+  const ps=getP(); const qs=getQ();
+  const aprobados=ps.filter(p=>p.approved).length;
+  const avg=ps.length?Math.round(ps.reduce((s,p)=>s+p.score,0)/ps.length):0;
+  const mejor=ps.length?Math.max(...ps.map(p=>p.score)):0;
+  document.getElementById('admin-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-n">${ps.length}</div><div class="stat-l">Total participantes</div></div>
+    <div class="stat-card"><div class="stat-n">${avg}%</div><div class="stat-l">Promedio general</div></div>
+    <div class="stat-card"><div class="stat-n">${mejor}%</div><div class="stat-l">Mejor puntaje</div></div>
+    <div class="stat-card"><div class="stat-n">${aprobados}</div><div class="stat-l">Aprobados</div></div>
+    <div class="stat-card"><div class="stat-n">${ps.length-aprobados}</div><div class="stat-l">No aprobados</div></div>
+    <div class="stat-card"><div class="stat-n">${qs.filter(q=>q.active).length}</div><div class="stat-l">Preguntas activas</div></div>`;
+
+  // Lista preguntas
+  const lp=document.getElementById('lista-preguntas');
+  lp.innerHTML='';
+  qs.forEach((q,i)=>{
+    const d=document.createElement('div'); d.className='q-item';
+    d.innerHTML=`<div style="flex:1">
+        <div class="q-item-txt">${i+1}. ${esc(q.text)}</div>
+        <div class="q-pills">
+          <span class="${q.active?'pill-on':'pill-off'}">${q.active?'Activa':'Inactiva'}</span>
+          <span class="pill-fails">⚽ Jugada correcta: ${['A','B','C','D'][q.correct]}</span>
+          <span class="pill-fails">❌ Fallos: ${q.fails||0}</span>
+        </div></div>
+      <div class="q-btns">
+        <button class="btn-a-edit" onclick="abrirModal('${q.id}')">✏️</button>
+        <button class="btn-a-del" onclick="eliminarPregunta('${q.id}')">🗑</button>
+        <button class="btn-a-tog ${q.active?'on':''}" onclick="togglePregunta('${q.id}')">
+          ${q.active?'ON':'OFF'}</button>
+      </div>`;
+    lp.appendChild(d);
+  });
+  if(qs.length===0) lp.innerHTML='<p style="color:#64748b;font-size:13px">Sin preguntas.</p>';
+
+  // Preguntas más falladas
+  const falladas=qs.filter(q=>(q.fails||0)>0).sort((a,b)=>(b.fails||0)-(a.fails||0)).slice(0,5);
+  const pf=document.getElementById('pregs-falladas');
+  pf.innerHTML=falladas.length?falladas.map((q,i)=>`
+    <div class="fallada-item">
+      <div class="fallada-txt">${i+1}. ${esc(q.text)}</div>
+      <span class="pill-fallo">${q.fails} fallos</span>
+    </div>`).join(''):'<p style="color:#64748b;font-size:13px">Sin datos aún.</p>';
+
+  // Participantes tabla admin
+  const ps2=[...ps].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const tb=document.getElementById('admin-part-tbody'); tb.innerHTML='';
+  ps2.forEach(p=>{
+    const d=new Date(p.date).toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${esc(p.name)}</td>
+      <td class="pct-col">${p.score}%</td>
+      <td class="${p.approved?'ok':'nok'}">${p.approved?'✅':'❌'}</td>
+      <td style="font-size:11px;color:rgba(255,255,255,.45)">${d}</td>
+      <td><button class="btn-a-del" onclick="elimPart('${p.id}')">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+  if(ps2.length===0) tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#64748b;padding:16px">Sin participantes</td></tr>';
+
+  // Últimos 5
+  const ul=document.getElementById('ultimos-part');
+  ul.innerHTML=ps2.slice(0,5).map(p=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;
+      padding:8px 0;border-bottom:1px solid #1e293b;font-size:13px">
+      <span>${esc(p.name)}</span>
+      <span class="pct-col" style="font-size:15px">${p.score}%</span>
+    </div>`).join('')||'<p style="color:#64748b;font-size:13px">Sin participantes.</p>';
+}
+
+function borrarTodos(){
+  if(!confirm('¿Borrar TODOS los registros de participantes? Esta acción no se puede deshacer.')) return;
+  guardar(K.p,[]);
+  renderAdmin();
+}
+function elimPart(id){
+  if(!confirm('¿Eliminar este registro?')) return;
+  guardar(K.p, getP().filter(p=>p.id!==id));
+  renderAdmin();
+}
+function eliminarPregunta(id){
+  if(!confirm('¿Eliminar esta pregunta?')) return;
+  guardar(K.q, getQ().filter(q=>q.id!==id));
+  renderAdmin();
+}
+function togglePregunta(id){
+  const qs=getQ();
+  const q=qs.find(q=>q.id===id);
+  if(q) q.active=!q.active;
+  guardar(K.q,qs);
+  renderAdmin();
+}
+function cambiarPass(){
+  const v=document.getElementById('inp-new-pass').value.trim();
+  if(!v||v.length<4){ alert('La contraseña debe tener al menos 4 caracteres.'); return; }
+  guardar(K.pass,v);
+  document.getElementById('inp-new-pass').value='';
+  alert('✅ Contraseña actualizada correctamente.');
+}
+
+// ─── MODAL PREGUNTA ────────────────────────────────────────────────
+function abrirModal(id){
+  document.getElementById('modal-preg').classList.remove('hidden');
+  if(id){
+    const q=getQ().find(q=>q.id===id);
+    if(!q) return;
+    document.getElementById('modal-titulo').textContent='Editar Pregunta';
+    document.getElementById('edit-id').value=q.id;
+    document.getElementById('q-texto').value=q.text;
+    for(let i=0;i<4;i++) document.getElementById('q-op'+i).value=q.options[i]||'';
+    document.getElementById('q-correcta').value=q.correct;
+    document.getElementById('q-activa').checked=q.active;
+  } else {
+    document.getElementById('modal-titulo').textContent='Nueva Pregunta';
+    document.getElementById('edit-id').value='';
+    document.getElementById('q-texto').value='';
+    for(let i=0;i<4;i++) document.getElementById('q-op'+i).value='';
+    document.getElementById('q-correcta').value='0';
+    document.getElementById('q-activa').checked=true;
+  }
+}
+function cerrarModal(){ document.getElementById('modal-preg').classList.add('hidden'); }
+
+function guardarPregunta(){
+  const texto=document.getElementById('q-texto').value.trim();
+  if(!texto){ alert('La pregunta no puede estar vacía.'); return; }
+  const ops=[];
+  for(let i=0;i<4;i++){
+    const v=(document.getElementById('q-op'+i)?.value||'').trim();
+    if(v) ops.push(v);
+  }
+  if(ops.length<2){ alert('Necesitas al menos 2 opciones.'); return; }
+  const corrIdx=parseInt(document.getElementById('q-correcta').value);
+  if(corrIdx>=ops.length){ alert('La respuesta correcta seleccionada no existe en las opciones.'); return; }
+  const activa=document.getElementById('q-activa').checked;
+  const eid=document.getElementById('edit-id').value;
+  const qs=getQ();
+  if(eid){
+    const idx=qs.findIndex(q=>q.id===eid);
+    if(idx>=0) qs[idx]={...qs[idx],text:texto,options:ops,correct:corrIdx,active:activa};
+  } else {
+    qs.push({id:uid(),text:texto,options:ops,correct:corrIdx,active:activa,fails:0});
+  }
+  guardar(K.q,qs);
+  cerrarModal();
+  renderAdmin();
+}
+
+// Click fuera del modal cierra
+document.getElementById('modal-preg').addEventListener('click',function(e){
+  if(e.target===this) cerrarModal();
+});
+
+// ─── UTILS ────────────────────────────────────────────────────────
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+</script>
+</body>
+</html>
