@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Publicidad – Mundial de Preguntas OCDI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap">
+<style>
+  /* Tamaño pensado para captura de pantalla / impresión A4 horizontal */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e8e8e8;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Rajdhani','Segoe UI',sans-serif}
+
+  .tarjeta{
+    width:1200px;height:630px;
+    background:linear-gradient(135deg,#f0f4f8 0%,#ffffff 50%,#e8f4fd 100%);
+    border-radius:18px;
+    display:flex;align-items:stretch;
+    position:relative;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+
+  /* Franja diagonal azul derecha */
+  .tarjeta::after{
+    content:'';position:absolute;right:-60px;top:-60px;
+    width:380px;height:800px;
+    background:linear-gradient(160deg,#005B8E 0%,#007FAD 60%,#009EC4 100%);
+    transform:rotate(8deg);z-index:0;
+  }
+
+  /* Franja dorada superior */
+  .franja-top{
+    position:absolute;top:0;left:0;right:0;height:8px;
+    background:linear-gradient(90deg,#FFB81C,#ffe066,#FFB81C);z-index:2;
+  }
+
+  /* Logo SDS top-left */
+  .logo-zona{
+    position:absolute;top:22px;left:32px;z-index:3;
+    display:flex;align-items:center;gap:10px;
+  }
+  .sello{
+    width:52px;height:52px;border-radius:50%;
+    background:linear-gradient(135deg,#003087,#005B8E);
+    display:flex;align-items:center;justify-content:center;
+    font-size:9px;color:#fff;font-weight:700;text-align:center;line-height:1.2;
+    border:2px solid #FFB81C;
+  }
+  .logo-texto{display:flex;flex-direction:column;line-height:1.2}
+  .logo-sds{font-size:11px;color:#003087;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+  .logo-ocdi{font-size:10px;color:#005B8E;font-weight:600;letter-spacing:.5px}
+
+  /* ── COLUMNA IZQUIERDA — Muñeco ── */
+  .col-muneco{
+    width:280px;flex-shrink:0;
+    display:flex;align-items:flex-end;justify-content:center;
+    padding-bottom:0;z-index:2;position:relative;
+  }
+  .muneco-img{
+    width:260px;height:auto;
+    object-fit:contain;
+    filter:drop-shadow(6px 6px 14px rgba(0,0,0,.22));
+  }
+  /* Placeholder cuando no hay imagen */
+  .muneco-placeholder{
+    width:220px;height:420px;
+    background:linear-gradient(180deg,rgba(0,48,135,.08),rgba(0,91,142,.05));
+    border:2.5px dashed #003087;border-radius:16px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:12px;color:#003087;font-weight:700;font-size:13px;text-align:center;
+    padding:20px;margin-bottom:20px;
+  }
+  .muneco-placeholder span{font-size:56px}
+
+  /* ── COLUMNA CENTRAL — Contenido ── */
+  .col-centro{
+    flex:1;display:flex;flex-direction:column;
+    justify-content:center;align-items:flex-start;
+    padding:40px 36px 36px 20px;z-index:2;
+  }
+
+  .titulo-juego{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:78px;line-height:.92;color:#003087;
+    text-shadow:2px 2px 0 rgba(0,48,135,.15);
+    margin-bottom:6px;
+  }
+  .titulo-juego span{color:#FFB81C}
+
+  .subtitulo-mundial{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:22px;letter-spacing:4px;color:#005B8E;
+    margin-bottom:22px;
+  }
+
+  .pregunta-caja{
+    background:linear-gradient(135deg,#003087 0%,#005B8E 100%);
+    border-radius:14px;padding:20px 26px;
+    max-width:520px;margin-bottom:24px;
+    box-shadow:0 8px 24px rgba(0,48,135,.25);
+    position:relative;
+  }
+  .pregunta-caja::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,#FFB81C,#ffe066,#FFB81C);
+    border-radius:14px 14px 0 0;
+  }
+  .pregunta-label{font-size:11px;color:rgba(255,255,255,.55);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+  .pregunta-texto{
+    font-size:20px;color:#fff;font-weight:700;line-height:1.4;
+    font-family:'Rajdhani',sans-serif;
+  }
+  .pregunta-texto em{color:#FFD060;font-style:normal}
+
+  .info-caja{
+    display:flex;gap:16px;align-items:flex-start;max-width:520px;margin-bottom:26px;
+  }
+  .info-icono{
+    width:44px;height:44px;border-radius:50%;
+    background:rgba(0,48,135,.08);border:2px solid #003087;
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;flex-shrink:0;
+  }
+  .info-cuerpo{display:flex;flex-direction:column;gap:4px}
+  .info-linea1{font-size:15px;font-weight:700;color:#003087;line-height:1.3}
+  .info-linea1 em{color:#005B8E;font-style:normal}
+  .info-linea2{font-size:13px;color:#444;line-height:1.4;font-weight:600}
+
+  .btn-consulta{
+    display:inline-block;background:linear-gradient(135deg,#FFB81C,#e08800);
+    color:#000;padding:11px 28px;border-radius:30px;
+    font-weight:700;font-size:14px;letter-spacing:1px;text-decoration:none;
+    box-shadow:0 4px 16px rgba(255,184,28,.4);cursor:default;
+  }
+
+  /* ── COLUMNA DERECHA — QR ── */
+  .col-qr{
+    width:200px;flex-shrink:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:16px;z-index:2;padding-right:28px;
+  }
+  .qr-caja{
+    background:#fff;border-radius:16px;
+    padding:14px;
+    box-shadow:0 0 0 3px #FFB81C,0 8px 28px rgba(0,0,0,.15);
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+  }
+  .qr-caja img{width:148px;height:148px;display:block;border-radius:4px}
+  .qr-label{font-size:11px;font-weight:700;color:#003087;text-align:center;letter-spacing:1px;text-transform:uppercase;line-height:1.3}
+
+  .pelota-deco{font-size:42px;animation:giro 4s linear infinite}
+  @keyframes giro{to{transform:rotate(360deg)}}
+
+  /* ── FOOTER ── */
+  .footer-pub{
+    position:absolute;bottom:0;left:0;right:0;height:42px;
+    background:linear-gradient(90deg,#003087,#005B8E);
+    display:flex;align-items:center;justify-content:center;z-index:3;
+  }
+  .footer-pub span{
+    font-size:12px;color:rgba(255,255,255,.85);letter-spacing:2px;
+    font-weight:700;font-family:'Rajdhani',sans-serif;text-transform:uppercase;
+  }
+  .footer-pub strong{color:#FFB81C}
+
+  /* Decoraciones de fondo */
+  .deco-ball{
+    position:absolute;font-size:160px;opacity:.04;
+    pointer-events:none;z-index:1;user-select:none;
+  }
+  .deco-ball.b1{bottom:-20px;left:260px;transform:rotate(-15deg)}
+  .deco-ball.b2{top:-30px;left:500px;transform:rotate(25deg)}
+
+  /* ══ Instrucciones para captura ══ */
+  .instrucciones{
+    margin-top:28px;text-align:center;font-size:13px;color:#555;
+    font-family:'Rajdhani',sans-serif;background:#fff;
+    border-radius:10px;padding:14px 24px;max-width:900px;
+    border:1.5px solid #FFB81C;
+  }
+  .instrucciones strong{color:#003087}
+</style>
+</head>
+<body>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:40px 20px">
+
+  <!-- ═══ TARJETA PRINCIPAL ═══ -->
+  <div class="tarjeta">
+    <div class="franja-top"></div>
+
+    <!-- Decoraciones -->
+    <div class="deco-ball b1">⚽</div>
+    <div class="deco-ball b2">⚽</div>
+
+    <!-- Logo SDS -->
+    <div class="logo-zona">
+      <div class="sello">SDS<br>OCDI</div>
+      <div class="logo-texto">
+        <span class="logo-sds">Secretaría Distrital de Salud</span>
+        <span class="logo-ocdi">Oficina de Control Disciplinario Interno</span>
+      </div>
+    </div>
+
+    <!-- MUÑECO -->
+    <div class="col-muneco">
+      <!--
+        INSTRUCCIÓN: Guarda la imagen del muñeco institucional como "muneco.png"
+        en esta misma carpeta y descomenta la línea de abajo.
+        Puedes recortar/exportar el muñeco de la imagen de referencia.
+      -->
+      <!-- <img class="muneco-img" src="muneco.png" alt="Mascota OCDI"> -->
+
+      <!-- Placeholder visible mientras no hay imagen -->
+      <div class="muneco-placeholder">
+        <span>🦸</span>
+        <div>Coloca aquí<br>la imagen<br><strong>muneco.png</strong></div>
+      </div>
+    </div>
+
+    <!-- CENTRO -->
+    <div class="col-centro">
+      <div class="subtitulo-mundial">⚽ MUNDIAL 2026 · COLOMBIA VS ARGENTINA</div>
+      <div class="titulo-juego">MUNDIAL<br>DE <span>PREGUNTAS</span></div>
+
+      <div class="pregunta-caja">
+        <div class="pregunta-label">¿Cuánto sabes del</div>
+        <div class="pregunta-texto">
+          <em>Lineamiento de Conflicto de Intereses</em><br>e inhabilidades?
+        </div>
+      </div>
+
+      <div class="info-caja">
+        <div class="info-icono">🎮</div>
+        <div class="info-cuerpo">
+          <div class="info-linea1">Haz clic o escanea el QR y participa en<br><em>nuestro juego interactivo.</em></div>
+          <div class="info-linea2">Aprenderemos jugando a reconocer situaciones de conflicto,<br>tomar decisiones éticas acertadas y fortalecer la integridad en nuestra gestión.</div>
+        </div>
+      </div>
+
+      <a class="btn-consulta">Consulta el lineamiento en el adjunto</a>
+    </div>
+
+    <!-- QR -->
+    <div class="col-qr">
+      <div class="pelota-deco">⚽</div>
+      <div class="qr-caja">
+        <!-- QR generado automáticamente para el enlace del juego -->
+        <img
+          src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=003087&bgcolor=ffffff&data=https://classy-cheesecake-9115cd.netlify.app"
+          alt="QR Juego"
+          onerror="this.alt='QR no cargó — verifica conexión a internet'"
+        >
+        <div class="qr-label">Escanea para<br>jugar ahora</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-pub">
+      <span>——— &nbsp;<strong>Oficina de Control Disciplinario Interno</strong>&nbsp; · &nbsp;Secretaría Distrital de Salud &nbsp;——— </span>
+    </div>
+  </div>
+
+  <!-- Instrucciones -->
+  <div class="instrucciones">
+    <strong>¿Cómo generar la imagen final?</strong><br>
+    1. Guarda la imagen del muñeco institucional como <strong>muneco.png</strong> en esta carpeta y descomenta la línea en el HTML.<br>
+    2. Abre este archivo en Chrome → presiona <strong>Ctrl+Shift+P</strong> → escribe <em>Capture screenshot</em> → selecciona <em>"Capture full size screenshot"</em>.<br>
+    3. La imagen se descargará automáticamente lista para usar en correos, presentaciones o impresión.
+  </div>
+
+</div>
+
+</body>
+</html>

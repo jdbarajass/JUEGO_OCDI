@@ -860,12 +860,13 @@ function iniciarPartido(){
 
   document.getElementById('nombre-mini').textContent = nombre.split(' ')[0];
   ir('juego');
+  iniciarAmbiente();
   posicionarBalon(0, false);
   renderPregunta();
 }
 
 let _timerInterval = null;
-const TIMER_SEG = 12;
+const TIMER_SEG = 40;
 
 function detenerTimer(){
   clearInterval(_timerInterval);
@@ -882,7 +883,7 @@ function iniciarTimer(){
   function actualizar(){
     if(numEl) numEl.textContent = restante;
     if(arcEl) arcEl.style.strokeDasharray = `${(restante/TIMER_SEG)*100} 100`;
-    const urgente = restante <= 4;
+    const urgente = restante <= 8;
     if(arcEl) arcEl.style.stroke = urgente ? '#ff5555' : '#FFB81C';
     if(numEl) numEl.style.color  = urgente ? '#ff5555' : '#fff';
   }
@@ -942,8 +943,10 @@ function responder(sel){
     if(i===sel) b.classList.add('seleccionada');
   });
 
+  if(ok) sonidoCelebrar(); else sonidoFallo();
   const pase=PASES[Math.floor(Math.random()*PASES.length)];
   mostrarEtiqueta(pase);
+  setTimeout(sonidoPase, 300);
   posicionarBalon(GS.idx+1, true);
 
   setTimeout(()=>{
@@ -1015,8 +1018,82 @@ function mostrarEtiqueta(txt){
 }
 function ocultarEtiqueta(){ document.getElementById('etiqueta-pase').style.opacity='0'; }
 
+// ─── AUDIO ────────────────────────────────────────────────────────
+let _audioCtx = null;
+let _ambSrc = null, _ambGain = null;
+
+function getACtx(){
+  if(!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(_audioCtx.state==='suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+
+function ruido(ctx, durSeg){
+  const buf = ctx.createBuffer(1, ctx.sampleRate*durSeg, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+  return buf;
+}
+
+function iniciarAmbiente(){
+  try{
+    if(_ambSrc) return;
+    const ctx = getACtx();
+    _ambSrc = ctx.createBufferSource();
+    _ambSrc.buffer = ruido(ctx, 4);
+    _ambSrc.loop = true;
+    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=450;
+    const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=380; bp.Q.value=0.4;
+    _ambGain = ctx.createGain(); _ambGain.gain.value=0;
+    _ambSrc.connect(lp); lp.connect(bp); bp.connect(_ambGain); _ambGain.connect(ctx.destination);
+    _ambSrc.start();
+    _ambGain.gain.linearRampToValueAtTime(0.06, ctx.currentTime+3);
+  }catch(e){}
+}
+
+function detenerAmbiente(){
+  try{
+    if(!_ambGain||!_audioCtx) return;
+    _ambGain.gain.linearRampToValueAtTime(0, _audioCtx.currentTime+1.5);
+    setTimeout(()=>{ try{ _ambSrc.stop(); }catch(e){} _ambSrc=null; }, 1700);
+  }catch(e){}
+}
+
+function sonidoPase(){
+  try{
+    const ctx = getACtx(), t=ctx.currentTime;
+    const src = ctx.createBufferSource(); src.buffer=ruido(ctx,0.22);
+    const hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=2200;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.28,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.22);
+    src.connect(hp); hp.connect(g); g.connect(ctx.destination); src.start(t);
+  }catch(e){}
+}
+
+function sonidoCelebrar(){
+  try{
+    const ctx = getACtx(), t=ctx.currentTime, dur=1.6;
+    const src = ctx.createBufferSource(); src.buffer=ruido(ctx,dur);
+    const d = src.buffer.getChannelData(0);
+    for(let i=0;i<d.length;i++){ const p=i/(ctx.sampleRate*dur); d[i]*=p<0.12?p/0.12:Math.exp(-(p-0.12)/0.55); }
+    const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=650; bp.Q.value=0.3;
+    const g = ctx.createGain(); g.gain.value=0.5;
+    src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t);
+  }catch(e){}
+}
+
+function sonidoFallo(){
+  try{
+    const ctx = getACtx(), t=ctx.currentTime;
+    const osc = ctx.createOscillator(); osc.type='sawtooth';
+    osc.frequency.setValueAtTime(220,t); osc.frequency.exponentialRampToValueAtTime(80,t+0.45);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.18,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+    osc.connect(g); g.connect(ctx.destination); osc.start(t); osc.stop(t+0.5);
+  }catch(e){}
+}
+
 // ─── RESULTADO ─────────────────────────────────────────────────────
 function mostrarResultado(){
+  detenerAmbiente();
   const {correctas,incorrectas,preguntas,nombre,respuestas} = GS;
   const total=preguntas.length;
   const pct=Math.round((correctas/total)*100);
