@@ -591,7 +591,7 @@ textarea,input,select{font-family:inherit}
     <div class="admin-card-title">❓ Banco de Preguntas</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn-a-add" onclick="abrirModal(null)">➕ Nueva Pregunta</button>
-      <button class="btn-a-add" style="background:rgba(255,184,28,.15);border-color:rgba(255,184,28,.4)" onclick="restaurarOficiales()">🔄 Restaurar preguntas oficiales</button>
+      <button class="btn-a-add" style="background:rgba(255,184,28,.15);border-color:rgba(255,184,28,.4)" onclick="restaurarOficiales()">⬆️ Subir preguntas oficiales a Sheets</button>
     </div>
     <div id="lista-preguntas"></div>
   </div>
@@ -786,20 +786,20 @@ const PREGUNTAS_DEFAULT = [
     correct:2 },
 ];
 
-// Inicializar storage — si no hay preguntas oficiales, cargar y sincronizar
+// Inicializar — Sheets es la fuente de verdad para preguntas
 (function inicializarPreguntas(){
-  const almacenadas = leer(K.q);
-  const tieneOficiales = almacenadas && almacenadas.some(q=>q.id==='q_of_1');
-  if(!tieneOficiales){
-    guardar(K.q, PREGUNTAS_DEFAULT);
-    _qCache = PREGUNTAS_DEFAULT;
-  }
   if(!leer(K.p)) guardar(K.p, []);
+  // Respaldo local: si localStorage está vacío usar defaults mientras carga Sheets
+  if(!leer(K.q)) guardar(K.q, PREGUNTAS_DEFAULT);
 
+  // Siempre traer desde Sheets (Sheets manda)
   fetchPreguntasSheets().then(qs=>{
-    const sheetsOk = qs && qs.some(q=>q.id==='q_of_1');
-    if(!sheetsOk) savePreguntasSheets(getQ());
-    else { _qCache=qs; guardar(K.q,qs); }
+    if(qs && qs.length > 0){
+      _qCache = qs;
+      guardar(K.q, qs);
+    }
+    // Si Sheets está vacío, el juego usa el respaldo local (PREGUNTAS_DEFAULT)
+    // sin subir nada a Sheets automáticamente
   });
 })();
 
@@ -1433,12 +1433,12 @@ async function elimPart(row){
   renderAdmin();
 }
 async function restaurarOficiales(){
-  if(!confirm('¿Restaurar las 7 preguntas oficiales OCDI?\nEsto reemplazará el banco actual en el juego y en Google Sheets.')) return;
+  if(!confirm('¿Subir las 7 preguntas oficiales OCDI a Google Sheets?\nEsto reemplazará lo que haya actualmente en la pestaña "Preguntas" del Excel.')) return;
   guardar(K.q, PREGUNTAS_DEFAULT);
   _qCache = PREGUNTAS_DEFAULT;
   await savePreguntasSheets(PREGUNTAS_DEFAULT);
   renderAdmin();
-  alert('✅ Preguntas oficiales restauradas y sincronizadas con Google Sheets.');
+  alert('✅ Preguntas oficiales subidas a Google Sheets.\n\nDesde ahora, edita directamente en el Excel y los cambios se verán en el juego al recargar.');
 }
 
 function eliminarPregunta(id){
