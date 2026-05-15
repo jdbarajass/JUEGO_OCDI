@@ -589,7 +589,10 @@ textarea,input,select{font-family:inherit}
   <!-- Preguntas -->
   <div class="admin-card">
     <div class="admin-card-title">❓ Banco de Preguntas</div>
-    <button class="btn-a-add" onclick="abrirModal(null)">➕ Nueva Pregunta</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn-a-add" onclick="abrirModal(null)">➕ Nueva Pregunta</button>
+      <button class="btn-a-add" style="background:rgba(255,184,28,.15);border-color:rgba(255,184,28,.4)" onclick="restaurarOficiales()">🔄 Restaurar preguntas oficiales</button>
+    </div>
     <div id="lista-preguntas"></div>
   </div>
 
@@ -751,47 +754,54 @@ async function fetchParticipantesSheets() {
   return null;
 }
 
+// ── Preguntas oficiales OCDI – Conflicto de Intereses 2026 ──
 const PREGUNTAS_DEFAULT = [
-  { id:uid(), active:true, fails:0,
-    text:'¿Cuál ley establece el Código General Disciplinario vigente en Colombia?',
-    options:['Ley 734 de 2002','Ley 1952 de 2019','Ley 2094 de 2021','Decreto 262 de 2000'], correct:1 },
-  { id:uid(), active:true, fails:0,
-    text:'¿Cuál es la garantía fundamental que protege al servidor público investigado en un proceso disciplinario?',
-    options:['Derecho al trabajo','Derecho de petición','Debido proceso','Derecho a la educación'], correct:2 },
-  { id:uid(), active:true, fails:0,
-    text:'¿Cuál de las siguientes es la sanción disciplinaria más grave?',
-    options:['Amonestación escrita','Multa económica','Suspensión del cargo','Destitución e inhabilidad general'], correct:3 },
-  { id:uid(), active:true, fails:0,
-    text:'¿Qué principio disciplinario establece que no puede existir falta sin ley previa que la defina?',
-    options:['Proporcionalidad','Legalidad','Celeridad','Eficacia'], correct:1 },
-  { id:uid(), active:true, fails:0,
-    text:'¿Cuántas instancias tiene el proceso disciplinario ordinario en Colombia?',
-    options:['Una','Dos','Tres','Cuatro'], correct:1 },
-  { id:uid(), active:true, fails:0,
-    text:'¿A qué entidad pertenece la Oficina de Control Disciplinario Interno (OCDI)?',
-    options:['Procuraduría General','Ministerio de Salud','Secretaría Distrital de Salud de Bogotá','Contraloría Distrital'], correct:2 },
-  { id:uid(), active:true, fails:0,
-    text:'¿Cuál es el término general de caducidad de la acción disciplinaria?',
-    options:['1 año','3 años','5 años','10 años'], correct:2 },
-  { id:uid(), active:true, fails:0,
-    text:'¿Qué tipo de falta disciplinaria da lugar a la sanción más severa?',
-    options:['Falta leve','Falta grave','Falta gravísima','Falta administrativa'], correct:2 },
-  { id:uid(), active:true, fails:0,
-    text:'¿Cuál es la función principal de la Oficina de Control Disciplinario Interno?',
-    options:['Gestionar el presupuesto','Contratar personal','Investigar y sancionar faltas disciplinarias','Auditar estados financieros'], correct:2 },
-  { id:uid(), active:true, fails:0,
-    text:'¿Qué es la indagación preliminar en el proceso disciplinario?',
-    options:['La sanción definitiva','La etapa de formulación de cargos','La fase inicial para verificar si hay mérito para investigar','El recurso de apelación'], correct:2 },
+  { id:'q_of_1', active:true, fails:0,
+    text:'¿Qué se busca garantizar a través de la declaratoria de un posible conflicto de intereses en el ejercicio de la función pública?',
+    options:['Evitar trabajar','Proteger la transparencia','Dilatar la actuación administrativa','Evadir responsabilidades'],
+    correct:1 },
+  { id:'q_of_2', active:true, fails:0,
+    text:'¿Cuáles son los tipos de conflicto de intereses reconocidos en la gestión pública, definidos en el Lineamiento de Conflictos de Intereses de la SDS?',
+    options:['Real, potencial y aparente','Administrativo, penal y fiscal','Directo, indirecto y disciplinario','Público, privado y contractual'],
+    correct:0 },
+  { id:'q_of_3', active:true, fails:0,
+    text:'El funcionario tiene intereses personales que podrían influenciar negativamente sus deberes y debe declararse impedido. Si el conflicto de interés es aceptado, ¿qué sucede?',
+    options:['El servidor continúa conociendo el caso','El servidor es sancionado automáticamente','El servidor se retira y un funcionario Ad hoc asume el caso','El proceso debe archivarse'],
+    correct:2 },
+  { id:'q_of_4', active:true, fails:0,
+    text:'Un servidor público tiene un interés particular, directo y personal en el asunto que tramita, pero no informa ni manifiesta el posible conflicto de intereses. Dicha conducta puede constituir:',
+    options:['Un llamado de atención verbal del superior jerárquico','Una falta disciplinaria','Una actualización de las funciones del servidor','Ninguna de las anteriores'],
+    correct:1 },
+  { id:'q_of_5', active:true, fails:0,
+    text:'Laura adelanta una actuación para imponer una sanción. Una de las partes informa que mantiene un proceso judicial en contra de Laura. Ella no manifestó impedimento ni conflicto de intereses. ¿Qué procede?',
+    options:['El interesado puede presentar una recusación formal para que el superior jerárquico decida','Laura puede continuar conociendo el asunto sin ningún trámite adicional','El interesado debe esperar a que termine la actuación para presentar la situación','La actuación debe cerrarse automáticamente'],
+    correct:0 },
+  { id:'q_of_6', active:true, fails:0,
+    text:'Un contratista de la SDS identifica una situación personal que podría afectar su imparcialidad o generar un posible conflicto de intereses en las actividades que ejecuta. ¿A quién debe informarlo?',
+    options:['A un compañero','A talento humano','Al supervisor del contrato','A cualquier persona'],
+    correct:2 },
+  { id:'q_of_7', active:true, fails:0,
+    text:'La SDS cuenta con un instrumento que establece directrices para la identificación, declaración y gestión de conflictos de intereses. ¿Cómo se denomina y en qué sistema se consulta?',
+    options:['Manual de sanciones disciplinarias – Intranet','Política de control fiscal interno – POGD','Lineamiento de Conflicto de Intereses – ISOLUCIÓN','Reglamento de bienestar laboral – Dirección de Talento Humano'],
+    correct:2 },
 ];
 
-// Inicializar storage
-if(!leer(K.q)) guardar(K.q, PREGUNTAS_DEFAULT);
-if(!leer(K.p)) guardar(K.p, []);
+// Inicializar storage — si no hay preguntas oficiales, cargar y sincronizar
+(function inicializarPreguntas(){
+  const almacenadas = leer(K.q);
+  const tieneOficiales = almacenadas && almacenadas.some(q=>q.id==='q_of_1');
+  if(!tieneOficiales){
+    guardar(K.q, PREGUNTAS_DEFAULT);
+    _qCache = PREGUNTAS_DEFAULT;
+  }
+  if(!leer(K.p)) guardar(K.p, []);
 
-// Cargar preguntas desde Sheets al iniciar
-fetchPreguntasSheets().then(qs => {
-  if (!qs || qs.length === 0) savePreguntasSheets(getQ());
-});
+  fetchPreguntasSheets().then(qs=>{
+    const sheetsOk = qs && qs.some(q=>q.id==='q_of_1');
+    if(!sheetsOk) savePreguntasSheets(getQ());
+    else { _qCache=qs; guardar(K.q,qs); }
+  });
+})();
 
 // ─── NAVEGACIÓN ────────────────────────────────────────────────────
 const PANTALLAS = ['inicio','admin-login','juego','resultado','podio','participantes','admin'];
@@ -1422,6 +1432,15 @@ async function elimPart(row){
   } catch(e) { console.warn('Sheets deleteRow error:', e); }
   renderAdmin();
 }
+async function restaurarOficiales(){
+  if(!confirm('¿Restaurar las 7 preguntas oficiales OCDI?\nEsto reemplazará el banco actual en el juego y en Google Sheets.')) return;
+  guardar(K.q, PREGUNTAS_DEFAULT);
+  _qCache = PREGUNTAS_DEFAULT;
+  await savePreguntasSheets(PREGUNTAS_DEFAULT);
+  renderAdmin();
+  alert('✅ Preguntas oficiales restauradas y sincronizadas con Google Sheets.');
+}
+
 function eliminarPregunta(id){
   if(!confirm('¿Eliminar esta pregunta?')) return;
   const qs=getQ().filter(q=>q.id!==id);
