@@ -1030,7 +1030,8 @@ function ocultarEtiqueta(){ document.getElementById('etiqueta-pase').style.opaci
 
 // ─── AUDIO ────────────────────────────────────────────────────────
 let _audioCtx = null;
-let _ambSrc = null, _ambGain = null;
+let _tribuna = null;   // Tribuna.mp3 — ambiente real de estadio
+let _fadeInt  = null;  // intervalo del fade
 
 function getACtx(){
   if(!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -1047,25 +1048,34 @@ function ruido(ctx, durSeg){
 
 function iniciarAmbiente(){
   try{
-    if(_ambSrc) return;
-    const ctx = getACtx();
-    _ambSrc = ctx.createBufferSource();
-    _ambSrc.buffer = ruido(ctx, 4);
-    _ambSrc.loop = true;
-    const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=450;
-    const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=380; bp.Q.value=0.4;
-    _ambGain = ctx.createGain(); _ambGain.gain.value=0;
-    _ambSrc.connect(lp); lp.connect(bp); bp.connect(_ambGain); _ambGain.connect(ctx.destination);
-    _ambSrc.start();
-    _ambGain.gain.linearRampToValueAtTime(0.06, ctx.currentTime+3);
+    if(!_tribuna){
+      _tribuna = new Audio('Tribuna.mp3');
+      _tribuna.loop = true;
+      _tribuna.volume = 0;
+    }
+    clearInterval(_fadeInt);
+    _tribuna.currentTime = 0;
+    _tribuna.play().catch(()=>{});
+    // Fade-in gradual hasta volumen 0.28
+    let v = 0;
+    _fadeInt = setInterval(()=>{
+      v = Math.min(0.28, v + 0.018);
+      _tribuna.volume = v;
+      if(v >= 0.28) clearInterval(_fadeInt);
+    }, 100);
   }catch(e){}
 }
 
 function detenerAmbiente(){
   try{
-    if(!_ambGain||!_audioCtx) return;
-    _ambGain.gain.linearRampToValueAtTime(0, _audioCtx.currentTime+1.5);
-    setTimeout(()=>{ try{ _ambSrc.stop(); }catch(e){} _ambSrc=null; }, 1700);
+    if(!_tribuna) return;
+    clearInterval(_fadeInt);
+    let v = _tribuna.volume;
+    _fadeInt = setInterval(()=>{
+      v = Math.max(0, v - 0.03);
+      _tribuna.volume = v;
+      if(v <= 0){ clearInterval(_fadeInt); _tribuna.pause(); }
+    }, 80);
   }catch(e){}
 }
 
@@ -1103,25 +1113,12 @@ function sonidoFallo(){
 
 function sonidoGol(){
   try{
-    const ctx=getACtx(), t=ctx.currentTime, dur=3.2;
-    // Rugido de estadio
-    const buf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
-    const d=buf.getChannelData(0);
-    for(let i=0;i<d.length;i++){
-      const p=i/(ctx.sampleRate*dur);
-      d[i]=(Math.random()*2-1)*(p<0.08?p/0.08:p<0.75?1:Math.exp(-(p-0.75)/0.25));
-    }
-    const src=ctx.createBufferSource(); src.buffer=buf;
-    const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=680; bp.Q.value=0.22;
-    const g=ctx.createGain(); g.gain.value=0.7;
-    src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t);
-    // Trompeta triunfal
-    const osc=ctx.createOscillator(); osc.type='square';
-    [440,550,660,880].forEach((f,i)=>osc.frequency.setValueAtTime(f,t+0.1+i*0.28));
-    const g2=ctx.createGain();
-    g2.gain.setValueAtTime(0,t); g2.gain.setValueAtTime(0.13,t+0.1);
-    g2.gain.setValueAtTime(0.13,t+1.1); g2.gain.linearRampToValueAtTime(0,t+1.5);
-    osc.connect(g2); g2.connect(ctx.destination); osc.start(t); osc.stop(t+1.5);
+    detenerAmbiente(); // bajar tribuna antes de celebrar
+    setTimeout(()=>{
+      const gol = new Audio('gol.mp4');
+      gol.volume = 1.0;
+      gol.play().catch(()=>{});
+    }, 400);
   }catch(e){}
 }
 
