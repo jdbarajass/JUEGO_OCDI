@@ -822,11 +822,11 @@ const PREGUNTAS_DEFAULT = [
   });
 })();
 
-// Arrancar Tribuna.mp3 en la primera interacción del usuario (política de autoplay del navegador)
+// Arrancar Intro.mp3 en la primera interacción del usuario (política de autoplay del navegador)
 function _activarAmbienteInicio(){
   if(_ambientePermitido) return;
   _ambientePermitido = true;
-  iniciarAmbiente();
+  iniciarIntro();
 }
 document.addEventListener('click',   _activarAmbienteInicio, {once:true});
 document.addEventListener('touchstart', _activarAmbienteInicio, {once:true});
@@ -837,7 +837,7 @@ function ir(nombre){
   PANTALLAS.forEach(p=>{ document.getElementById('screen-'+p).classList.add('hidden') });
   document.getElementById('screen-'+nombre).classList.remove('hidden');
   window.scrollTo(0,0);
-  if(nombre==='inicio' && _ambientePermitido) iniciarAmbiente();
+  if(nombre==='inicio' && _ambientePermitido) iniciarIntro();
   if(nombre==='podio') renderPodio();
   if(nombre==='participantes'){ _pCache=null; renderParticipantes(); }
   if(nombre==='admin') renderAdmin();
@@ -899,6 +899,7 @@ function iniciarPartido(){
   };
 
   document.getElementById('nombre-mini').textContent = nombre.split(' ')[0];
+  detenerIntro();
   ir('juego');
   iniciarAmbiente();
   posicionarBalon(0, false);
@@ -1060,8 +1061,10 @@ function ocultarEtiqueta(){ document.getElementById('etiqueta-pase').style.opaci
 
 // ─── AUDIO ────────────────────────────────────────────────────────
 let _audioCtx = null;
-let _tribuna = null;   // Tribuna.mp3 — ambiente real de estadio
-let _fadeInt  = null;  // intervalo del fade
+let _intro    = null;  // Intro.mp3 — música fuera del juego
+let _introFadeInt = null;
+let _tribuna  = null;  // Tribuna.mp3 — ambiente durante las preguntas
+let _fadeInt  = null;
 let _ambientePermitido = false; // true después de la primera interacción del usuario
 
 function getACtx(){
@@ -1075,6 +1078,39 @@ function ruido(ctx, durSeg){
   const d = buf.getChannelData(0);
   for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
   return buf;
+}
+
+function iniciarIntro(){
+  try{
+    if(!_intro){
+      _intro = new Audio('Intro.mp3');
+      _intro.loop = true;
+      _intro.volume = 0;
+    }
+    if(!_intro.paused) return;
+    clearInterval(_introFadeInt);
+    _intro.currentTime = 0;
+    _intro.play().catch(()=>{});
+    let v = 0;
+    _introFadeInt = setInterval(()=>{
+      v = Math.min(0.32, v + 0.018);
+      _intro.volume = v;
+      if(v >= 0.32) clearInterval(_introFadeInt);
+    }, 100);
+  }catch(e){}
+}
+
+function detenerIntro(){
+  try{
+    if(!_intro) return;
+    clearInterval(_introFadeInt);
+    let v = _intro.volume;
+    _introFadeInt = setInterval(()=>{
+      v = Math.max(0, v - 0.04);
+      _intro.volume = v;
+      if(v <= 0){ clearInterval(_introFadeInt); _intro.pause(); }
+    }, 80);
+  }catch(e){}
 }
 
 function iniciarAmbiente(){
