@@ -529,6 +529,10 @@ textarea,input,select{font-family:inherit}
       <div class="score-num" id="res-incorrectas" style="color:#f87171"></div>
       <div class="score-label">Incorrectas</div>
     </div>
+    <div class="score-item" style="grid-column:1/-1">
+      <div class="score-num" id="res-tiempo" style="color:#FFB81C;font-size:32px"></div>
+      <div class="score-label">⏱ Tiempo total</div>
+    </div>
   </div>
 
   <div class="info-participante" id="res-info"></div>
@@ -746,7 +750,8 @@ async function fetchParticipantesSheets() {
           correct: Number(d.correctas) || 0,
           incorrect: Number(d.incorrectas) || 0,
           date: d.fecha || new Date().toISOString(),
-          approved: Number(d.puntaje) >= 70
+          approved: Number(d.puntaje) >= 70,
+          tiempo: Number(d.tiempo_segundos) || 0
         }))
         .filter(p => p.name);
     }
@@ -866,6 +871,7 @@ function iniciarPartido(){
     respuestas:[], correctas:0, incorrectas:0,
     respondido:false,
     posiciones: calcularPosiciones(mezcla.length),
+    startTime: Date.now(),
   };
 
   document.getElementById('nombre-mini').textContent = nombre.split(' ')[0];
@@ -1154,11 +1160,15 @@ function mostrarResultado(){
   const aprobado=pct>=70;
   const ahora=new Date();
 
+  // Tiempo total en segundos
+  const tiempo = GS.startTime ? Math.round((Date.now() - GS.startTime) / 1000) : 0;
+
   // Guardar participante
   const part={
     id:uid(), name:nombre, score:pct, correct:correctas,
     incorrect:incorrectas, total, approved:aprobado,
-    date:ahora.toISOString(), answers:respuestas
+    date:ahora.toISOString(), answers:respuestas,
+    tiempo
   };
   const ps=getP(); ps.push(part); guardar(K.p,ps);
   enviarResultadoSheets(part); _pCache = null;
@@ -1181,6 +1191,8 @@ function mostrarResultado(){
   document.getElementById('res-pct').textContent=pct+'%';
   document.getElementById('res-correctas').textContent=correctas;
   document.getElementById('res-incorrectas').textContent=incorrectas;
+  document.getElementById('res-tiempo').textContent=
+    tiempo>=60?`${Math.floor(tiempo/60)}:${String(tiempo%60).padStart(2,'0')} min`:`${tiempo}s`;
   document.getElementById('res-info').innerHTML=
     `<strong style="color:#fff">${esc(nombre)}</strong><br>${fmt(ahora)}`;
 
@@ -1251,7 +1263,15 @@ async function renderPodio(){
   const row=document.getElementById('podio-row');
   row.innerHTML='<p style="color:rgba(255,255,255,.45);font-size:14px">⏳ Cargando resultados...</p>';
   const sheetsData=await fetchParticipantesSheets();
-  const ps=(sheetsData||getP()).sort((a,b)=>b.score-a.score||a.incorrect-b.incorrect||(new Date(a.date)-new Date(b.date)));
+  // Orden: 1° mayor puntaje · 2° menos tiempo (desempate) · 3° menos incorrectas
+  const ps=(sheetsData||getP()).sort((a,b)=>
+    b.score - a.score ||
+    (a.tiempo||9999) - (b.tiempo||9999) ||
+    a.incorrect - b.incorrect
+  );
+
+  // Formatea segundos → "1:23" o "45s"
+  const fmtT = s => s>0 ? (s>=60?`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} min`:`${s}s`) : '—';
 
   // Top 3 visual
   row.innerHTML='';
@@ -1269,6 +1289,7 @@ async function renderPodio(){
         div.innerHTML=`<div class="podio-medal">${med[i]}</div>
           <div class="podio-nombre">${esc(p.name)}</div>
           <div class="podio-pct">${p.score}%</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">⏱ ${fmtT(p.tiempo)}</div>
           <div class="podio-bloque">${i+1}°</div>`;
       } else {
         div.innerHTML=`<div class="podio-medal" style="opacity:.3">${med[i]}</div>
@@ -1291,6 +1312,7 @@ async function renderPodio(){
       <td class="pct-col">${p.score}%</td>
       <td class="ok">${p.correct}</td>
       <td class="nok">${p.incorrect}</td>
+      <td style="font-size:12px;color:rgba(255,255,255,.65)">⏱ ${fmtT(p.tiempo)}</td>
       <td class="${p.approved?'ok':'nok'}">${p.approved?'✅':'❌'}</td>`;
     tbody.appendChild(tr);
   });
