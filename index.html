@@ -251,6 +251,20 @@ textarea,input,select{font-family:inherit}
   text-shadow:0 0 35px rgba(255,80,80,.6)}
 @keyframes zoomIn{0%{transform:scale(0) rotate(-10deg)}100%{transform:scale(1)}}
 
+/* ── TARJETA ROJA ── */
+.overlay-tarjeta-roja{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  z-index:9998;pointer-events:none}
+.overlay-tarjeta-roja img{width:min(210px,42vw);
+  filter:drop-shadow(0 0 40px rgba(220,0,0,.95)) drop-shadow(0 0 90px rgba(255,50,50,.5));
+  animation:tarjetaRojaAnim 1.9s ease-out forwards}
+@keyframes tarjetaRojaAnim{
+  0%{transform:scale(0) rotate(-30deg);opacity:0}
+  22%{transform:scale(1.45) rotate(6deg);opacity:1}
+  42%{transform:scale(1.0) rotate(-3deg)}
+  62%{transform:scale(1.07) rotate(0deg)}
+  82%{transform:scale(1.0);opacity:1}
+  100%{transform:scale(0.65) rotate(12deg);opacity:0}}
+
 /* ── CONFETI ── */
 #confeti-wrap{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
 .confeti{position:absolute;top:-12px;animation:caer linear forwards}
@@ -808,12 +822,22 @@ const PREGUNTAS_DEFAULT = [
   });
 })();
 
+// Arrancar Tribuna.mp3 en la primera interacción del usuario (política de autoplay del navegador)
+function _activarAmbienteInicio(){
+  if(_ambientePermitido) return;
+  _ambientePermitido = true;
+  iniciarAmbiente();
+}
+document.addEventListener('click',   _activarAmbienteInicio, {once:true});
+document.addEventListener('touchstart', _activarAmbienteInicio, {once:true});
+
 // ─── NAVEGACIÓN ────────────────────────────────────────────────────
 const PANTALLAS = ['inicio','admin-login','juego','resultado','podio','participantes','admin'];
 function ir(nombre){
   PANTALLAS.forEach(p=>{ document.getElementById('screen-'+p).classList.add('hidden') });
   document.getElementById('screen-'+nombre).classList.remove('hidden');
   window.scrollTo(0,0);
+  if(nombre==='inicio' && _ambientePermitido) iniciarAmbiente();
   if(nombre==='podio') renderPodio();
   if(nombre==='participantes'){ _pCache=null; renderParticipantes(); }
   if(nombre==='admin') renderAdmin();
@@ -959,7 +983,7 @@ function responder(sel){
     if(i===sel) b.classList.add('seleccionada');
   });
 
-  if(ok) sonidoCelebrar(); else sonidoFallo();
+  if(ok){ sonidoCelebrar(); } else { sonidoFallo(); sonidoSilbato(); mostrarTarjetaRoja(); }
   const pase=PASES[Math.floor(Math.random()*PASES.length)];
   mostrarEtiqueta(pase);
   setTimeout(sonidoPase, 300);
@@ -1038,6 +1062,7 @@ function ocultarEtiqueta(){ document.getElementById('etiqueta-pase').style.opaci
 let _audioCtx = null;
 let _tribuna = null;   // Tribuna.mp3 — ambiente real de estadio
 let _fadeInt  = null;  // intervalo del fade
+let _ambientePermitido = false; // true después de la primera interacción del usuario
 
 function getACtx(){
   if(!_audioCtx) _audioCtx = new (window.AudioContext||window.webkitAudioContext)();
@@ -1059,6 +1084,7 @@ function iniciarAmbiente(){
       _tribuna.loop = true;
       _tribuna.volume = 0;
     }
+    if(!_tribuna.paused) return; // ya está sonando, no reiniciar
     clearInterval(_fadeInt);
     _tribuna.currentTime = 0;
     _tribuna.play().catch(()=>{});
@@ -1119,13 +1145,40 @@ function sonidoFallo(){
 
 function sonidoGol(){
   try{
-    detenerAmbiente(); // bajar tribuna antes de celebrar
+    detenerAmbiente();
     setTimeout(()=>{
       const gol = new Audio('gol.mp4');
       gol.volume = 1.0;
       gol.play().catch(()=>{});
     }, 400);
   }catch(e){}
+}
+
+function sonidoDecepcion(){
+  try{
+    detenerAmbiente();
+    setTimeout(()=>{
+      const audio = new Audio('Sonido de decepción.mp3');
+      audio.volume = 1.0;
+      audio.play().catch(()=>{});
+    }, 400);
+  }catch(e){}
+}
+
+function sonidoSilbato(){
+  try{
+    const audio = new Audio('Silbato.mp3');
+    audio.volume = 1.0;
+    audio.play().catch(()=>{});
+  }catch(e){}
+}
+
+function mostrarTarjetaRoja(){
+  const el = document.createElement('div');
+  el.className = 'overlay-tarjeta-roja';
+  el.innerHTML = '<img src="Tarjeta Roja.jpg" alt="Tarjeta Roja">';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1900);
 }
 
 function sonidoDerrota(){
@@ -1208,7 +1261,7 @@ function mostrarResultado(){
     setTimeout(()=>confeti(),400);
     animGol();
   } else {
-    sonidoDerrota();
+    sonidoDecepcion();
     document.getElementById('res-icono').textContent='😔';
     document.getElementById('res-titulo').className='res-titulo perdio';
     document.getElementById('res-titulo').textContent='Se fue por fuera...';
