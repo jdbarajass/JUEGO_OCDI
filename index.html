@@ -251,6 +251,32 @@ textarea,input,select{font-family:inherit}
   text-shadow:0 0 35px rgba(255,80,80,.6)}
 @keyframes zoomIn{0%{transform:scale(0) rotate(-10deg)}100%{transform:scale(1)}}
 
+/* ── TRANSICIÓN SIGUE AVANZANDO ── */
+.overlay-avanzando{position:fixed;inset:0;
+  background:linear-gradient(120deg,#001a4d 0%,#003087 45%,#c47c00 100%);
+  z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  pointer-events:none;animation:barridoAvz 2.2s cubic-bezier(.77,0,.18,1) forwards}
+.avz-titulo{font-family:'Bebas Neue',sans-serif;font-size:clamp(54px,16vw,106px);
+  color:#FFB81C;letter-spacing:5px;text-align:center;
+  text-shadow:0 0 70px rgba(255,184,28,.95),0 0 140px rgba(255,184,28,.35),0 6px 20px rgba(0,0,0,.8);
+  animation:zoomAvz .55s cubic-bezier(.34,1.56,.64,1) both}
+.avz-sub{font-family:'Rajdhani',sans-serif;font-size:clamp(15px,4.5vw,22px);
+  color:rgba(255,255,255,.88);letter-spacing:3.5px;font-weight:700;text-transform:uppercase;
+  animation:zoomAvz .55s .18s cubic-bezier(.34,1.56,.64,1) both}
+.avz-num{font-family:'Bebas Neue',sans-serif;font-size:clamp(22px,6vw,38px);
+  color:rgba(255,255,255,.55);letter-spacing:3px;margin-top:6px;
+  animation:zoomAvz .55s .32s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes barridoAvz{
+  0%  {transform:translateX(-100%)}
+  18% {transform:translateX(0)}
+  76% {transform:translateX(0)}
+  100%{transform:translateX(105%)}
+}
+@keyframes zoomAvz{
+  0%  {transform:scale(.45) translateY(12px);opacity:0}
+  100%{transform:scale(1)   translateY(0);  opacity:1}
+}
+
 /* ── TARJETA ROJA ── */
 .overlay-tarjeta-roja{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
   z-index:9998;pointer-events:none}
@@ -907,7 +933,7 @@ function iniciarPartido(){
 }
 
 let _timerInterval = null;
-const TIMER_SEG = 50;
+const TIMER_SEG = 70;
 
 function detenerTimer(){
   clearInterval(_timerInterval);
@@ -996,7 +1022,8 @@ function responder(sel){
     if(GS.idx>=GS.preguntas.length){
       setTimeout(mostrarResultado, 500);
     } else {
-      renderPregunta();
+      mostrarTransicionAvanzando(GS.idx+1, GS.preguntas.length);
+      setTimeout(renderPregunta, 700);
     }
   }, 1300);
 }
@@ -1215,6 +1242,17 @@ function mostrarTarjetaRoja(){
   el.innerHTML = '<img src="Tarjeta Roja.jpg" alt="Tarjeta Roja">';
   document.body.appendChild(el);
   setTimeout(()=>el.remove(), 1900);
+}
+
+function mostrarTransicionAvanzando(siguienteNum, total){
+  const el = document.createElement('div');
+  el.className = 'overlay-avanzando';
+  el.innerHTML = `
+    <div class="avz-titulo">⚽ ¡Sigue Avanzando!</div>
+    <div class="avz-sub">¡Siguiente pregunta!</div>
+    <div class="avz-num">${siguienteNum} de ${total}</div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2200);
 }
 
 function sonidoDerrota(){
