@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>La Ruta de Papá Noel – SDS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Mountains+of+Christmas:wght@700&display=swap">
+<style>
+/* ══════════════ TOKENS ══════════════ */
+:root{
+  --noche-1:#030817; --noche-2:#0a1838; --noche-3:#13284f;
+  --rojo:#e8304a; --rojo-osc:#9e1530; --verde:#18b66a; --verde-osc:#0b6b3d;
+  --oro:#ffcf5a; --oro-osc:#c98a12; --hielo:#bfe9ff; --nieve:#f4fbff;
+  --vidrio:rgba(255,255,255,.07); --borde:rgba(255,255,255,.14);
+  --txt:#f4f8ff; --txt-2:rgba(230,240,255,.72); --txt-3:rgba(230,240,255,.45);
+  --ok:#3ee08f; --nok:#ff6b7f;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:'Fredoka','Segoe UI',system-ui,sans-serif;color:var(--txt);overflow-x:hidden}
+body{background:
+  radial-gradient(ellipse 90% 60% at 50% -10%,#1d3f7a 0%,transparent 60%),
+  linear-gradient(180deg,var(--noche-1) 0%,var(--noche-2) 55%,var(--noche-3) 100%) fixed;
+  background-color:var(--noche-1)}
+.hidden{display:none!important}
+button{font-family:inherit;cursor:pointer}
+input,textarea,select{font-family:inherit}
+.screen{min-height:100dvh;width:100%;display:flex;flex-direction:column;align-items:center;position:relative}
+
+/* ══════════════ CAPAS GLOBALES ══════════════ */
+#nieve{position:fixed;inset:0;pointer-events:none;z-index:50}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:9500}
+.aurora{position:fixed;inset:-20% -10% auto -10%;height:70vh;pointer-events:none;z-index:0;filter:blur(60px);opacity:.55}
+.aurora i{position:absolute;border-radius:50%;mix-blend-mode:screen;animation:auroraMove 18s ease-in-out infinite alternate}
+.aurora i:nth-child(1){width:55vw;height:30vh;left:5%;top:10%;background:#19e3a0;animation-duration:16s}
+.aurora i:nth-child(2){width:45vw;height:26vh;left:40%;top:0;background:#3d7bff;animation-duration:21s}
+.aurora i:nth-child(3){width:40vw;height:22vh;left:60%;top:18%;background:#b44dff;animation-duration:25s;opacity:.7}
+@keyframes auroraMove{0%{transform:translate(0,0) scale(1)}50%{transform:translate(6vw,4vh) scale(1.15)}100%{transform:translate(-5vw,-2vh) scale(.95)}}
+.estrellas{position:fixed;inset:0;pointer-events:none;z-index:0}
+.estrella{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;animation:titilar 3s ease-in-out infinite}
+@keyframes titilar{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
+
+.btn-sonido{position:fixed;top:12px;right:12px;z-index:9600;width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--borde);background:rgba(5,12,30,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.btn-sonido:hover{transform:scale(1.08)}
+
+/* ══════════════ COMPONENTES ══════════════ */
+.vidrio{background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,.03));
+  border:1px solid var(--borde);border-radius:22px;backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+  box-shadow:0 24px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12)}
+.btn-main{position:relative;width:100%;padding:17px 20px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,#ff5a6e 0%,var(--rojo) 45%,var(--rojo-osc) 100%);
+  color:#fff;font-size:21px;font-weight:700;letter-spacing:.5px;
+  box-shadow:0 6px 0 #6d0c1f,0 12px 30px rgba(232,48,74,.45);top:0;transition:top .08s,box-shadow .08s;overflow:hidden}
+.btn-main::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);animation:brillo 3.2s ease-in-out infinite}
+@keyframes brillo{0%,60%{left:-60%}100%{left:130%}}
+.btn-main:hover{top:-2px;box-shadow:0 8px 0 #6d0c1f,0 16px 36px rgba(232,48,74,.55)}
+.btn-main:active{top:5px;box-shadow:0 1px 0 #6d0c1f,0 4px 12px rgba(232,48,74,.35)}
+.btn-sec{padding:14px 18px;border-radius:14px;border:1px solid var(--borde);background:rgba(255,255,255,.07);
+  color:#fff;font-size:16px;font-weight:600;transition:background .2s}
+.btn-sec:hover{background:rgba(255,255,255,.13)}
+.btn-verde{background:linear-gradient(135deg,#2fd68a,var(--verde) 50%,var(--verde-osc));box-shadow:0 6px 0 #064527,0 10px 26px rgba(24,182,106,.4);color:#fff;border:none}
+
+/* ══════════════ INICIO ══════════════ */
+#screen-inicio{justify-content:center;gap:18px;padding:70px 18px 40px;z-index:2;overflow:hidden}
+.pill-top{background:linear-gradient(135deg,var(--oro),var(--oro-osc));color:#2a1700;padding:6px 18px;border-radius:30px;
+  font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;box-shadow:0 0 26px rgba(255,207,90,.45)}
+.logo{text-align:center;line-height:.9}
+.logo .l1{display:block;font-size:clamp(20px,5.5vw,30px);font-weight:600;letter-spacing:6px;text-transform:uppercase;color:var(--hielo);
+  text-shadow:0 0 18px rgba(191,233,255,.6)}
+.logo .l2{display:block;font-family:'Mountains of Christmas',cursive;font-size:clamp(58px,17vw,112px);
+  background:linear-gradient(180deg,#fff 0%,#ffe9a8 40%,var(--oro) 70%,#ff9f2e 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 24px rgba(255,207,90,.55)) drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+.inst{text-align:center;font-size:14px;color:var(--txt-2);letter-spacing:1px;line-height:1.6;font-weight:500}
+.inst strong{display:block;color:var(--oro);letter-spacing:2.5px;text-transform:uppercase;font-size:14px}
+.cielo-inicio{position:relative;width:100%;max-width:560px;height:130px}
+.cielo-inicio .luna{position:absolute;right:8%;top:0;width:96px;height:96px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fffbe8 0%,#ffe9a8 55%,#e9c56a 100%);
+  box-shadow:0 0 60px rgba(255,233,168,.6),0 0 140px rgba(255,233,168,.25)}
+.cielo-inicio .trineo-wrap{position:absolute;top:26px;left:0;width:200px;animation:vueloInicio 9s linear infinite}
+@keyframes vueloInicio{0%{transform:translate(-220px,30px) rotate(-4deg)}50%{transform:translate(calc(50vw - 100px),-6px) rotate(-1deg)}100%{transform:translate(calc(100vw + 40px),20px) rotate(-5deg)}}
+.form-card{width:100%;max-width:420px;padding:24px}
+.form-card label{display:block;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--hielo);margin-bottom:9px}
+.form-card input{width:100%;padding:15px 18px;border-radius:14px;border:1.5px solid rgba(255,255,255,.16);background:rgba(0,0,0,.35);
+  color:#fff;font-size:18px;font-weight:500;outline:none;transition:border-color .2s,box-shadow .2s}
+.form-card input:focus{border-color:var(--oro);box-shadow:0 0 0 4px rgba(255,207,90,.18)}
+.form-card input::placeholder{color:rgba(255,255,255,.3)}
+.err-msg{color:var(--nok);font-size:14px;margin-top:8px;display:none;font-weight:500}
+.reglas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 4px}
+.regla{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:9px 6px;text-align:center;font-size:12px;color:var(--txt-2);line-height:1.3}
+.regla b{display:block;font-size:20px;margin-bottom:2px}
+.links-row{display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
+.link-nav{color:var(--oro);font-weight:600;font-size:16px;cursor:pointer;text-shadow:0 0 12px rgba(255,207,90,.4);background:none;border:none}
+.link-nav:hover{text-shadow:0 0 22px rgba(255,207,90,.9)}
+.link-volver{color:var(--hielo);text-decoration:none;font-size:14px;font-weight:500;opacity:.8}
+.link-volver:hover{opacity:1}
+.btn-admin-oculto{background:transparent;border:none;color:rgba(255,255,255,.08);font-size:10px;padding:4px}
+
+/* ══════════════ JUEGO ══════════════ */
+#screen-juego{justify-content:flex-start;z-index:2}
+.hud{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 64px 10px 14px;
+  background:linear-gradient(180deg,rgba(3,8,23,.95),rgba(3,8,23,.75));border-bottom:1px solid rgba(255,207,90,.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);position:relative;z-index:6}
+.hud-bloque{display:flex;flex-direction:column;align-items:center;min-width:54px}
+.hud-n{font-size:20px;font-weight:700;line-height:1;color:var(--oro);text-shadow:0 0 12px rgba(255,207,90,.6)}
+.hud-l{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt-3);margin-top:3px;font-weight:500}
+.hud-nombre{font-size:15px;font-weight:600;color:var(--hielo);max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.racha{transition:transform .2s}
+.racha.on{animation:latido .6s ease}
+@keyframes latido{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+.espiritu{width:100%;height:6px;background:rgba(255,255,255,.07);position:relative;z-index:6}
+.espiritu-fill{height:100%;width:0;background:linear-gradient(90deg,var(--verde),var(--oro),var(--rojo));box-shadow:0 0 14px rgba(255,207,90,.7);transition:width .8s cubic-bezier(.3,1.4,.5,1);border-radius:0 4px 4px 0}
+
+/* ESCENA */
+@media(max-height:760px){.casa{scale:.8}}
+@media(max-height:640px){.casa{scale:.68}}
+.escena{position:relative;width:100%;height:max(250px,37vh);overflow:hidden;
+  background:radial-gradient(ellipse 70% 80% at 70% 0%,rgba(61,123,255,.35),transparent 60%),
+    linear-gradient(180deg,#050d24 0%,#0d2350 60%,#1b3a6e 100%)}
+.escena .luna-s{position:absolute;right:7%;top:12%;width:58px;height:58px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fffbe8,#ffe9a8 60%,#dcb75c);box-shadow:0 0 40px rgba(255,233,168,.6)}
+.escena .aur{position:absolute;inset:-30% -10% 40% -10%;filter:blur(36px);opacity:.5}
+.escena .aur i{position:absolute;border-radius:50%;mix-blend-mode:screen;animation:auroraMove 14s ease-in-out infinite alternate}
+.escena .aur i:nth-child(1){width:60%;height:50%;left:0;top:30%;background:#19e3a0}
+.escena .aur i:nth-child(2){width:50%;height:45%;left:45%;top:20%;background:#8a4dff;animation-duration:19s}
+.montes{position:absolute;left:0;right:0;bottom:0;height:70%;pointer-events:none}
+.pueblo{position:absolute;left:0;bottom:0;height:100%;transition:transform 1.3s cubic-bezier(.65,0,.25,1);will-change:transform}
+.suelo{position:absolute;left:-2000px;right:-2000px;bottom:0;height:16%;
+  background:linear-gradient(180deg,#e9f6ff 0%,#c4e2f7 100%);box-shadow:0 -6px 18px rgba(191,233,255,.35);border-radius:50% 50% 0 0/20px 20px 0 0}
+
+/* CASA */
+.casa{position:absolute;bottom:13%;width:150px;height:150px;transform-origin:bottom center}
+.casa .cuerpo{position:absolute;left:18px;right:18px;bottom:0;height:78px;border-radius:4px 4px 0 0;
+  background:var(--cc,#7c3a2a);box-shadow:inset 0 -10px 20px rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.12)}
+.casa .techo{position:absolute;left:6px;right:6px;bottom:74px;height:58px;background:var(--ct,#3a1d16);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.casa .nieve-techo{position:absolute;left:2px;right:2px;bottom:120px;height:18px;
+  background:radial-gradient(circle at 50% 100%,#fff 60%,transparent 62%);opacity:.95}
+.casa .chimenea{position:absolute;right:30px;bottom:104px;width:20px;height:38px;background:#5b5b6b;border-radius:2px;
+  box-shadow:inset -4px 0 0 rgba(0,0,0,.25)}
+.casa .chimenea::before{content:'';position:absolute;left:-3px;right:-3px;top:-5px;height:8px;background:#fff;border-radius:6px}
+.casa .ventana{position:absolute;bottom:34px;width:24px;height:24px;border-radius:3px;background:#1a2440;
+  border:3px solid #e9dcc6;transition:background .6s,box-shadow .6s}
+.casa .ventana::before,.casa .ventana::after{content:'';position:absolute;background:#e9dcc6}
+.casa .ventana::before{left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%)}
+.casa .ventana::after{top:50%;left:0;right:0;height:2px;transform:translateY(-50%)}
+.casa .v1{left:32px}.casa .v2{right:32px}
+.casa .puerta{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:22px;height:36px;border-radius:11px 11px 0 0;background:#2b1610}
+.casa .corona{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);width:16px;height:16px;border-radius:50%;
+  border:4px solid #1d8a4a;opacity:.85}
+.casa .luces{position:absolute;left:10px;right:10px;bottom:74px;height:10px;display:flex;justify-content:space-between;opacity:0;transition:opacity .4s}
+.casa .luces i{width:7px;height:7px;border-radius:50%;background:var(--lc);box-shadow:0 0 8px var(--lc),0 0 16px var(--lc);animation:parpadeo 1.2s infinite}
+.casa .luces i:nth-child(odd){animation-delay:.6s}
+@keyframes parpadeo{0%,100%{opacity:1}50%{opacity:.25}}
+.casa .num{position:absolute;left:50%;bottom:-24px;transform:translateX(-50%);font-size:11px;font-weight:600;color:#47658e;letter-spacing:1px;white-space:nowrap}
+.casa.actual .num{color:var(--rojo)}
+.casa.encendida .ventana{background:#ffd46b;box-shadow:0 0 18px #ffbf3d,0 0 36px rgba(255,191,61,.6)}
+.casa.encendida .luces{opacity:1}
+.casa.encendida{animation:saltoCasa .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes saltoCasa{0%{transform:scale(1)}40%{transform:scale(1.08,0.94)}70%{transform:scale(.97,1.04)}100%{transform:scale(1)}}
+.casa.apagada .cuerpo{filter:grayscale(.7) brightness(.6)}
+.casa.apagada .techo{filter:grayscale(.7) brightness(.6)}
+.casa .marca{position:absolute;left:50%;top:-6px;transform:translateX(-50%) scale(0);font-size:26px;transition:transform .4s cubic-bezier(.3,1.8,.5,1)}
+.casa.encendida .marca,.casa.apagada .marca{transform:translateX(-50%) scale(1)}
+.humo{position:absolute;right:32px;bottom:142px;width:14px;height:14px;border-radius:50%;background:rgba(220,230,245,.5);opacity:0}
+.casa.encendida .humo{animation:humo 2.6s ease-out infinite}
+.casa.encendida .humo:nth-of-type(2){animation-delay:1.3s}
+@keyframes humo{0%{opacity:.7;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(-18px,-50px) scale(2.2)}}
+
+/* TRINEO */
+.trineo-juego{position:absolute;left:50%;top:5%;width:min(280px,54vw);transform:translateX(-58%);z-index:4;pointer-events:none}
+.trineo-flota{animation:flotar 2.4s ease-in-out infinite}
+@keyframes flotar{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(1deg)}}
+.trineo-juego.sacudir .trineo-flota{animation:sacudir .5s ease}
+@keyframes sacudir{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px) rotate(-6deg)}40%{transform:translateX(9px) rotate(5deg)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+.trineo-juego.avanzar .trineo-flota{animation:avanzar 1.3s cubic-bezier(.65,0,.25,1)}
+@keyframes avanzar{0%{transform:translate(0,0) rotate(-2deg)}35%{transform:translate(28px,-14px) rotate(-8deg)}100%{transform:translate(0,0) rotate(-2deg)}}
+.trineo-juego.despegar{transition:transform 1.6s cubic-bezier(.6,0,.4,1),opacity 1.6s;transform:translate(120%,-120%) rotate(-14deg);opacity:0}
+.trineo{position:relative;width:100%}
+.trineo svg{width:100%;height:auto;display:block;overflow:visible;filter:drop-shadow(0 8px 14px rgba(0,0,0,.5))}
+.trineo .santa{position:absolute;left:9%;top:-12%;font-size:clamp(30px,8vw,46px);line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.4))}
+.trineo .saco{position:absolute;left:0;top:6%;font-size:clamp(18px,5vw,26px)}
+.pata{animation:galope .5s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:top center}
+.pata.b{animation-delay:.25s}
+@keyframes galope{0%{transform:rotate(-22deg)}100%{transform:rotate(22deg)}}
+.reno{animation:renoBob .5s ease-in-out infinite alternate}
+.reno.r2{animation-delay:.2s}
+@keyframes renoBob{0%{transform:translateY(0)}100%{transform:translateY(-3px)}}
+.burbuja{position:absolute;left:2%;top:-48%;background:#fff;color:var(--rojo);font-weight:700;font-size:15px;padding:6px 12px;border-radius:14px 14px 14px 2px;
+  box-shadow:0 6px 18px rgba(0,0,0,.35);opacity:0;transform:scale(.4);transform-origin:bottom left;transition:opacity .25s,transform .35s cubic-bezier(.3,1.8,.5,1);white-space:nowrap}
+.burbuja.show{opacity:1;transform:scale(1)}
+.objeto-cae{position:fixed;z-index:9000;pointer-events:none;font-size:30px;line-height:1;left:0;top:0;will-change:transform}
+.carbon{width:24px;height:22px;border-radius:40% 55% 45% 50%;background:radial-gradient(circle at 35% 30%,#666 0%,#2a2a2a 45%,#0b0b0b 100%);box-shadow:0 0 0 2px rgba(0,0,0,.4)}
+.puntos-flot{position:fixed;z-index:9100;pointer-events:none;font-weight:700;font-size:26px;color:var(--oro);text-shadow:0 0 14px rgba(255,207,90,.9),0 2px 4px rgba(0,0,0,.6);
+  animation:subir 1.4s ease-out forwards}
+@keyframes subir{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-70px) scale(1)}}
+
+/* PREGUNTA */
+.panel{width:100%;max-width:880px;flex:1;padding:14px 14px 26px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:6}
+.preg-card{padding:16px 18px}
+.preg-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.badge{background:linear-gradient(135deg,var(--rojo),var(--rojo-osc));padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;letter-spacing:.5px;box-shadow:0 0 16px rgba(232,48,74,.4)}
+.badge-casa{font-size:13px;color:var(--txt-2);font-weight:500}
+.preg-txt{font-size:clamp(18px,4.9vw,23px);font-weight:600;line-height:1.42;color:#fff;text-wrap:pretty}
+.timer-ring{position:relative;width:44px;height:44px;flex-shrink:0}
+.timer-ring svg{width:44px;height:44px;transform:rotate(-90deg)}
+.timer-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:3.5}
+.timer-arc{fill:none;stroke:var(--verde);stroke-width:3.5;stroke-dasharray:100 100;stroke-linecap:round;transition:stroke-dasharray 1s linear,stroke .3s}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.opciones{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:720px){.opciones{grid-template-columns:repeat(var(--n,3),1fr)}}
+.regalo{--c1:#e8304a;--c2:#9e1530;--cinta:#ffcf5a;position:relative;min-height:84px;padding:18px 50px 16px 62px;border-radius:18px;border:none;
+  text-align:left;color:#fff;font-size:clamp(16px,4.3vw,18px);font-weight:600;line-height:1.35;
+  background:
+    linear-gradient(90deg,transparent 0,transparent 34px,var(--cinta) 34px,var(--cinta) 44px,transparent 44px),
+    linear-gradient(145deg,var(--c1),var(--c2));
+  box-shadow:0 6px 0 rgba(0,0,0,.35),0 14px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25);
+  transition:transform .2s cubic-bezier(.3,1.6,.5,1),box-shadow .2s,filter .3s;transform-style:preserve-3d;
+  animation:entraRegalo .5s cubic-bezier(.3,1.5,.5,1) both}
+.regalo:nth-child(2){animation-delay:.08s}.regalo:nth-child(3){animation-delay:.16s}.regalo:nth-child(4){animation-delay:.24s}
+@keyframes entraRegalo{0%{opacity:0;transform:translateY(26px) scale(.9) rotate(-2deg)}100%{opacity:1;transform:none}}
+.regalo.g1{--c1:#1fc07a;--c2:#0b6b3d;--cinta:#ff4d64}
+.regalo.g2{--c1:#4d8dff;--c2:#1f3f99;--cinta:#e9f4ff}
+.regalo.g3{--c1:#b06bff;--c2:#5b25a8;--cinta:#ffcf5a}
+.regalo .letra{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff 0%,var(--cinta) 55%,rgba(0,0,0,.25) 100%);color:#2a1700;font-weight:700;font-size:16px;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+.regalo .lazo{position:absolute;left:24px;top:-12px;font-size:22px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));transition:transform .3s}
+.regalo:hover:not(:disabled){transform:translateY(-4px) rotate(-.6deg) scale(1.02);box-shadow:0 10px 0 rgba(0,0,0,.3),0 20px 40px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3)}
+.regalo:hover:not(:disabled) .lazo{transform:rotate(-14deg) scale(1.15)}
+.regalo:active:not(:disabled){transform:scale(.97)}
+.regalo:disabled{cursor:default}
+.regalo.atenuada{filter:grayscale(.75) brightness(.55)}
+.regalo.correcta{filter:none;box-shadow:0 0 0 3px var(--ok),0 0 34px rgba(62,224,143,.7),0 6px 0 rgba(0,0,0,.35)}
+.regalo.correcta::after{content:'✓';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:var(--ok);color:#03321b;font-weight:700;display:flex;align-items:center;justify-content:center}
+.regalo.incorrecta{filter:none;animation:sacudirOp .5s ease;box-shadow:0 0 0 3px var(--nok),0 0 30px rgba(255,107,127,.6)}
+.regalo.incorrecta::after{content:'✕';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:var(--nok);color:#3d0010;font-weight:700;display:flex;align-items:center;justify-content:center}
+@keyframes sacudirOp{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+.feedback{min-height:24px;text-align:center;font-size:17px;font-weight:600;visibility:hidden}
+.feedback.show{visibility:visible;animation:fbIn .35s cubic-bezier(.3,1.5,.5,1)}
+@keyframes fbIn{0%{opacity:0;transform:translateY(8px) scale(.9)}100%{opacity:1;transform:none}}
+
+/* TRANSICIÓN */
+.overlay-parada{position:fixed;inset:0;z-index:9200;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(115deg,rgba(158,21,48,.97) 0%,rgba(232,48,74,.96) 40%,rgba(11,107,61,.96) 100%);
+  animation:barrido 1.9s cubic-bezier(.77,0,.18,1) forwards}
+.overlay-parada::before{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(135deg,rgba(255,255,255,.07) 0 18px,transparent 18px 36px)}
+@keyframes barrido{0%{clip-path:circle(0% at 50% 50%)}22%{clip-path:circle(80% at 50% 50%)}76%{clip-path:circle(80% at 50% 50%)}100%{clip-path:circle(0% at 50% 50%)}}
+.op-t{position:relative;font-family:'Mountains of Christmas',cursive;font-size:clamp(46px,13vw,92px);color:#fff;text-shadow:0 0 30px rgba(255,255,255,.5),0 6px 18px rgba(0,0,0,.4);animation:zoomP .5s .15s cubic-bezier(.34,1.56,.64,1) both}
+.op-s{position:relative;font-size:clamp(16px,4.5vw,22px);font-weight:600;letter-spacing:3px;text-transform:uppercase;animation:zoomP .5s .28s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes zoomP{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+
+/* ══════════════ RESULTADO ══════════════ */
+#screen-resultado{justify-content:center;gap:16px;padding:70px 18px 34px;text-align:center;z-index:2}
+.res-icono{font-size:88px;animation:popIn .7s cubic-bezier(.3,1.6,.5,1);filter:drop-shadow(0 0 26px rgba(255,207,90,.6))}
+@keyframes popIn{0%{transform:scale(0) rotate(-20deg)}100%{transform:scale(1) rotate(0)}}
+.res-titulo{font-family:'Mountains of Christmas',cursive;font-size:clamp(44px,12vw,80px);line-height:1}
+.res-titulo.gano{background:linear-gradient(180deg,#fff,var(--oro) 60%,#ff9f2e);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 22px rgba(255,207,90,.55))}
+.res-titulo.perdio{color:var(--hielo);text-shadow:0 0 22px rgba(191,233,255,.5)}
+.res-msg{max-width:440px;color:var(--txt-2);font-size:16px;line-height:1.55;font-weight:500}
+.estado-pill{padding:10px 26px;border-radius:30px;font-weight:700;letter-spacing:2px;text-transform:uppercase;font-size:15px}
+.pill-ok{background:linear-gradient(135deg,#2fd68a,var(--verde-osc));box-shadow:0 0 30px rgba(24,182,106,.5)}
+.pill-no{background:linear-gradient(135deg,#ff6b7f,var(--rojo-osc));box-shadow:0 0 26px rgba(232,48,74,.45)}
+.res-card{width:100%;max-width:440px;padding:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.res-item{display:flex;flex-direction:column;align-items:center;gap:2px}
+.res-item.full{grid-column:1/-1}
+.res-n{font-size:32px;font-weight:700;line-height:1.1}
+.res-pct{font-size:66px;font-weight:700;color:var(--oro);text-shadow:0 0 30px rgba(255,207,90,.6);line-height:1}
+.res-l{font-size:11px;color:var(--txt-3);text-transform:uppercase;letter-spacing:1.5px;font-weight:500}
+.mini-pueblo{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;font-size:26px}
+.mini-pueblo span{display:inline-flex;flex-direction:column;align-items:center;font-size:11px;color:var(--txt-3);gap:2px}
+.mini-pueblo span b{font-size:26px;line-height:1}
+.mini-pueblo span.off b{filter:grayscale(1) brightness(.5)}
+.btns-fila{display:flex;gap:10px;width:100%;max-width:440px;flex-wrap:wrap}
+.btns-fila>*{flex:1 1 120px}
+
+/* ══════════════ SECUNDARIAS ══════════════ */
+.screen-sec{padding:66px 16px 30px;gap:18px;z-index:2}
+.sec-head{width:100%;max-width:620px;display:flex;align-items:center;gap:14px}
+.btn-volver{padding:9px 16px;border-radius:12px;border:1px solid var(--borde);background:rgba(255,255,255,.07);color:#fff;font-size:15px;font-weight:500}
+.sec-titulo{font-family:'Mountains of Christmas',cursive;font-size:clamp(30px,8vw,44px);color:var(--oro);text-shadow:0 0 20px rgba(255,207,90,.4);line-height:1}
+.podio-row{display:flex;align-items:flex-end;justify-content:center;gap:10px;width:100%;max-width:480px;min-height:60px}
+.podio-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.podio-medal{font-size:36px}
+.podio-nombre{font-size:clamp(11px,3vw,14px);font-weight:600;text-align:center;line-height:1.2;word-break:break-word}
+.podio-pct{font-size:24px;font-weight:700;color:var(--oro)}
+.podio-t{font-size:12px;color:var(--txt-3)}
+.podio-bloque{width:100%;border-radius:12px 12px 4px 4px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;position:relative;overflow:hidden;
+  background:linear-gradient(90deg,transparent 44%,rgba(255,255,255,.75) 44%,rgba(255,255,255,.75) 56%,transparent 56%),linear-gradient(160deg,var(--pc1),var(--pc2))}
+.p1 .podio-bloque{--pc1:#ffd86b;--pc2:#c98a12;height:110px;box-shadow:0 0 40px rgba(255,207,90,.55);color:#3a2300}
+.p2 .podio-bloque{--pc1:#e3edf7;--pc2:#8ea4b8;height:80px;color:#1c2833}
+.p3 .podio-bloque{--pc1:#f0a774;--pc2:#9a4f1d;height:60px;color:#2d1405}
+.tabla-wrap{width:100%;max-width:620px;overflow-x:auto;padding:6px 4px}
+.data-table{width:100%;border-collapse:collapse;font-size:14px}
+.data-table th{padding:10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--oro);border-bottom:1px solid rgba(255,207,90,.25);white-space:nowrap;font-weight:600}
+.data-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.05)}
+.data-table tr:hover td{background:rgba(255,255,255,.03)}
+.ok{color:var(--ok);font-weight:600}.nok{color:var(--nok);font-weight:600}.pct-col{color:var(--oro);font-weight:700}
+.vacio{text-align:center;color:var(--txt-3);padding:18px}
+.buscador{width:100%;max-width:620px;padding:13px 16px;border-radius:14px;border:1.5px solid rgba(255,255,255,.14);background:rgba(0,0,0,.3);color:#fff;font-size:16px;outline:none}
+.buscador:focus{border-color:var(--oro)}
+.count-txt{font-size:14px;color:var(--txt-3)}
+.resumen{width:100%;max-width:620px;padding:14px 16px;font-size:14px;color:var(--txt-2);line-height:1.9}
+
+/* ══════════════ ADMIN ══════════════ */
+.admin-card{width:100%;max-width:640px;padding:18px}
+.admin-title{font-size:13px;font-weight:600;color:var(--oro);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:rgba(0,0,0,.25);border-radius:14px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,.05)}
+.stat-n{font-size:28px;font-weight:700;color:var(--oro)}
+.stat-l{font-size:12px;color:var(--txt-3)}
+.a-input{width:100%;padding:11px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.35);color:#fff;font-size:15px;margin-bottom:8px;outline:none}
+.a-input:focus{border-color:var(--oro)}
+.a-label{display:block;font-size:12px;color:var(--txt-3);margin-bottom:4px}
+.btn-a{padding:9px 14px;border-radius:10px;border:none;font-weight:600;font-size:14px;color:#fff;background:var(--verde-osc);margin:0 6px 10px 0}
+.btn-a.rojo{background:var(--rojo-osc)}.btn-a.azul{background:#1f4fa8}.btn-a.gris{background:#39445a}
+.btn-a.on{background:var(--verde)}
+.btn-a.peq{padding:5px 10px;font-size:12px;margin:0}
+.q-item{background:rgba(0,0,0,.25);border-radius:12px;padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;border:1px solid rgba(255,255,255,.05)}
+.q-item-txt{flex:1;font-size:14px;line-height:1.4}
+.q-pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.qp{padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600;background:rgba(255,255,255,.08);color:var(--txt-2)}
+.qp.on{background:rgba(24,182,106,.25);color:var(--ok)}.qp.off{background:rgba(232,48,74,.25);color:var(--nok)}
+.q-btns{display:flex;flex-direction:column;gap:5px}
+.info-box{font-size:13px;color:var(--txt-2);line-height:1.6;background:rgba(0,0,0,.25);border-radius:12px;padding:12px;border:1px solid rgba(255,255,255,.06)}
+.info-box code{background:rgba(255,255,255,.1);padding:1px 6px;border-radius:6px;font-size:12px}
+.modal-overlay{position:fixed;inset:0;z-index:9700;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.modal-box{width:100%;max-width:440px;max-height:88vh;overflow-y:auto;padding:22px;background:#0c1a38}
+.modal-title{font-family:'Mountains of Christmas',cursive;font-size:32px;color:var(--oro);margin-bottom:14px}
+.modal-btns{display:flex;gap:8px;margin-top:12px}
+.modal-btns>*{flex:1}
+.chk-row{display:flex;align-items:center;gap:8px;font-size:14px;margin:6px 0}
+
+/* ══════════════ CELULAR ══════════════ */
+@media(max-width:600px){
+  .hud{padding:8px 58px 8px 10px;gap:4px}
+  .hud-sub{display:none}
+  .hud-bloque{min-width:0}
+  .hud-n{font-size:17px}
+  .hud-l{font-size:9px;letter-spacing:.8px}
+  .hud-nombre{font-size:14px;max-width:84px}
+  .escena{height:max(190px,28vh)}
+  .trineo-juego{width:46vw;top:4%}
+  .panel{padding:10px 12px 22px;gap:10px}
+  .preg-card{padding:13px 14px}
+  .preg-head{margin-bottom:8px}
+  .regalo{min-height:62px;padding:14px 46px 12px 56px}
+  .regalo .letra{width:30px;height:30px;font-size:14px;left:10px}
+  .regalo .lazo{left:18px;top:-11px;font-size:19px}
+  .reglas{gap:6px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<div class="aurora"><i></i><i></i><i></i></div>
+<div class="estrellas" id="estrellas"></div>
+<canvas id="nieve"></canvas>
+<canvas id="fx"></canvas>
+<button class="btn-sonido" id="btn-sonido" onclick="toggleSonido()" title="Sonido" aria-label="Activar o silenciar sonido">🔊</button>
+
+<!-- SVG reutilizable del trineo (original) -->
+<template id="tpl-trineo">
+  <div class="trineo">
+    <svg viewBox="0 0 320 120" aria-hidden="true">
+      <defs>
+        <linearGradient id="gTrineo" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ff5a6e"/><stop offset=".55" stop-color="#d81f3c"/><stop offset="1" stop-color="#8d0f27"/>
+        </linearGradient>
+        <linearGradient id="gReno" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#b9824f"/><stop offset="1" stop-color="#7a4b25"/>
+        </linearGradient>
+      </defs>
+      <!-- riendas -->
+      <path d="M140 58 Q190 50 214 62 M140 62 Q230 58 278 64" stroke="#ffcf5a" stroke-width="2" fill="none" opacity=".9"/>
+      <!-- reno 1 -->
+      <g transform="translate(212 52)"><g class="reno r1">
+        <g class="pata"><rect x="-14" y="6" width="4" height="22" rx="2" fill="#6a3f1e"/></g>
+        <g class="pata b"><rect x="-6" y="6" width="4" height="22" rx="2" fill="#6a3f1e"/></g>
+        <g class="pata b"><rect x="12" y="6" width="4" height="22" rx="2" fill="#6a3f1e"/></g>
+        <g class="pata"><rect x="20" y="6" width="4" height="22" rx="2" fill="#6a3f1e"/></g>
+        <ellipse cx="5" cy="6" rx="24" ry="11" fill="url(#gReno)"/>
+        <path d="M22 0 L32 -16 L38 -14 L30 4 Z" fill="url(#gReno)"/>
+        <ellipse cx="38" cy="-17" rx="9" ry="6" fill="url(#gReno)"/>
+        <circle cx="46" cy="-16" r="2.6" fill="#3a1f0e"/>
+        <circle cx="38" cy="-19" r="1.4" fill="#111"/>
+        <path d="M34 -22 L30 -34 M30 -34 L25 -38 M30 -34 L33 -41 M38 -22 L40 -34 M40 -34 L36 -40 M40 -34 L45 -39" stroke="#e7d3a8" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <path d="M-18 2 L-24 -4" stroke="#e8e0cc" stroke-width="4" stroke-linecap="round"/>
+        <rect x="16" y="-2" width="10" height="5" rx="2" fill="#d81f3c"/>
+      </g></g>
+      <!-- reno 2 -->
+      <g transform="translate(276 56)"><g class="reno r2">
+        <g class="pata b"><rect x="-14" y="6" width="4" height="20" rx="2" fill="#6a3f1e"/></g>
+        <g class="pata"><rect x="-6" y="6" width="4" height="20" rx="2" fill="#6a3f1e"/></g>
+        <g class="pata"><rect x="12" y="6" width="4" height="20" rx="2" fill="#6a3f1e"/></g>
+        <g class="pata b"><rect x="20" y="6" width="4" height="20" rx="2" fill="#6a3f1e"/></g>
+        <ellipse cx="5" cy="6" rx="22" ry="10" fill="url(#gReno)"/>
+        <path d="M20 0 L29 -15 L35 -13 L28 4 Z" fill="url(#gReno)"/>
+        <ellipse cx="35" cy="-16" rx="8.5" ry="5.6" fill="url(#gReno)"/>
+        <circle cx="43" cy="-15" r="2.4" fill="#3a1f0e"/>
+        <circle cx="35" cy="-18" r="1.3" fill="#111"/>
+        <path d="M31 -21 L27 -32 M27 -32 L22 -36 M27 -32 L30 -38 M35 -21 L37 -32 M37 -32 L33 -37 M37 -32 L42 -36" stroke="#e7d3a8" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <rect x="14" y="-2" width="10" height="5" rx="2" fill="#18b66a"/>
+      </g></g>
+      <!-- trineo -->
+      <path d="M8 104 L138 104 Q160 104 160 86" stroke="#ffcf5a" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M40 90 L40 104 M112 90 L112 104" stroke="#ffcf5a" stroke-width="4"/>
+      <path d="M12 46 Q8 88 48 92 L122 92 Q140 92 142 72 L146 36 Q128 52 100 50 L44 50 Q26 50 12 46 Z" fill="url(#gTrineo)" stroke="#ffcf5a" stroke-width="3"/>
+      <path d="M30 62 Q70 70 128 62" stroke="#ffcf5a" stroke-width="2" fill="none" opacity=".7"/>
+      <circle cx="78" cy="76" r="6" fill="#ffcf5a"/>
+    </svg>
+    <span class="saco">🎁</span>
+    <span class="santa">🎅</span>
+    <span class="burbuja">¡Jo jo jo!</span>
+  </div>
+</template>
+
+<!-- ══════════════ INICIO ══════════════ -->
+<div id="screen-inicio" class="screen">
+  <span class="pill-top">🎄 Navidad 2026 · Lineamiento de Conflicto de Intereses</span>
+  <div class="cielo-inicio">
+    <div class="luna"></div>
+    <div class="trineo-wrap" id="trineo-inicio"></div>
+  </div>
+  <div class="logo"><span class="l1">La ruta de</span><span class="l2">Papá Noel</span></div>
+  <div class="inst">
+    <strong>Secretaría Distrital de Salud (SDS)</strong>
+    Oficina de Control Disciplinario Interno (OCDI)
+  </div>
+
+  <div class="form-card vidrio">
+    <label for="inp-nombre">Nombre completo *</label>
+    <input type="text" id="inp-nombre" placeholder="Ej: María García López" autocomplete="name" autocorrect="off"
+           onkeydown="if(event.key==='Enter')iniciarMision()">
+    <div class="err-msg" id="err-nombre">⚠ Escribe tu nombre y apellido completos.</div>
+    <div class="reglas">
+      <div class="regla"><b>🎁</b>Acierta y entrega el regalo</div>
+      <div class="regla"><b>🔥</b>Racha = más puntos</div>
+      <div class="regla"><b>⏱</b>Responde rápido</div>
+    </div>
+    <button class="btn-main" onclick="iniciarMision()">🛷 Iniciar la misión</button>
+  </div>
+
+  <div class="links-row">
+    <button class="link-nav" onclick="ir('podio')">🏆 Podio</button>
+    <button class="link-nav" onclick="ir('participantes')">📋 Participantes</button>
+  </div>
+  <a class="link-volver" href="index.html">← Elegir otro juego</a>
+  <button class="btn-admin-oculto" onclick="irAdminLogin()" title="Admin">⚙</button>
+</div>
+
+<!-- ══════════════ ADMIN LOGIN ══════════════ -->
+<div id="screen-admin-login" class="screen screen-sec hidden" style="justify-content:center">
+  <div style="font-size:48px">🔐</div>
+  <div class="sec-titulo">Panel del Taller</div>
+  <div class="form-card vidrio" style="max-width:360px">
+    <label for="inp-pass">Contraseña</label>
+    <input type="password" id="inp-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')verificarAdmin()">
+    <div class="err-msg" id="err-pass">Contraseña incorrecta.</div>
+    <button class="btn-main" style="margin-top:14px" onclick="verificarAdmin()">Acceder</button>
+    <button class="btn-sec" style="width:100%;margin-top:10px" onclick="ir('inicio')">Cancelar</button>
+  </div>
+</div>
+
+<!-- ══════════════ JUEGO ══════════════ -->
+<div id="screen-juego" class="screen hidden">
+  <div class="hud">
+    <div class="hud-bloque" style="align-items:flex-start">
+      <span class="hud-nombre" id="hud-nombre">—</span>
+      <span class="hud-l hud-sub">Ayudante de Papá Noel</span>
+    </div>
+    <div class="hud-bloque"><span class="hud-n" id="hud-regalos">0/8</span><span class="hud-l">🎁 Entregados</span></div>
+    <div class="hud-bloque racha" id="hud-racha-b"><span class="hud-n" id="hud-racha">0</span><span class="hud-l">🔥 Racha</span></div>
+    <div class="hud-bloque"><span class="hud-n" id="hud-puntos">0</span><span class="hud-l">⭐ Puntos</span></div>
+  </div>
+  <div class="espiritu"><div class="espiritu-fill" id="espiritu-fill"></div></div>
+
+  <div class="escena" id="escena">
+    <div class="aur"><i></i><i></i></div>
+    <div class="luna-s"></div>
+    <svg class="montes" viewBox="0 0 1200 300" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 300 L0 170 L120 90 L230 160 L360 60 L470 150 L600 80 L720 170 L850 70 L980 160 L1090 100 L1200 150 L1200 300 Z" fill="#132a55" opacity=".9"/>
+      <path d="M360 60 L330 82 L352 78 L372 90 L392 80 Z M850 70 L822 92 L846 86 L866 98 L884 88 Z M120 90 L98 106 L118 102 L136 112 L150 104 Z" fill="#e9f6ff" opacity=".8"/>
+      <path d="M0 300 L0 220 L150 170 L300 215 L450 160 L620 220 L780 170 L950 215 L1100 175 L1200 205 L1200 300 Z" fill="#1c3a6e"/>
+    </svg>
+    <div class="pueblo" id="pueblo"><div class="suelo"></div></div>
+    <div class="trineo-juego" id="trineo-juego"><div class="trineo-flota" id="trineo-flota"></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="preg-card vidrio">
+      <div class="preg-head">
+        <span class="badge" id="badge-num">Pregunta 1</span>
+        <span class="badge-casa" id="badge-casa">🏠 Casa 1</span>
+        <div class="timer-ring">
+          <svg viewBox="0 0 36 36"><circle class="timer-bg" cx="18" cy="18" r="15.9"/><circle class="timer-arc" id="timer-arc" cx="18" cy="18" r="15.9"/></svg>
+          <span class="timer-num" id="timer-num">60</span>
+        </div>
+      </div>
+      <div class="preg-txt" id="preg-txt">Cargando…</div>
+    </div>
+    <div class="opciones" id="opciones"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+</div>
+
+<!-- ══════════════ RESULTADO ══════════════ -->
+<div id="screen-resultado" class="screen hidden">
+  <div class="res-icono" id="res-icono">🎄</div>
+  <div class="res-titulo" id="res-titulo"></div>
+  <div class="res-msg" id="res-msg"></div>
+  <div class="estado-pill" id="res-estado"></div>
+  <div class="res-card vidrio">
+    <div class="res-item full"><div class="res-pct" id="res-pct">0%</div><div class="res-l">Puntaje final</div></div>
+    <div class="res-item"><div class="res-n ok" id="res-ok">0</div><div class="res-l">Correctas</div></div>
+    <div class="res-item"><div class="res-n nok" id="res-nok">0</div><div class="res-l">Incorrectas</div></div>
+    <div class="res-item"><div class="res-n" style="color:var(--hielo)" id="res-tiempo">0s</div><div class="res-l">⏱ Tiempo</div></div>
+    <div class="res-item full"><div class="res-n" style="color:var(--oro)" id="res-puntos">0</div><div class="res-l">⭐ Puntos navideños · mejor racha <span id="res-racha">0</span></div></div>
+    <div class="res-item full"><div class="mini-pueblo" id="res-pueblo"></div></div>
+  </div>
+  <div class="res-msg" id="res-info" style="font-size:14px"></div>
+  <div class="btns-fila">
+    <button class="btn-sec" onclick="ir('inicio')">🏠 Inicio</button>
+    <button class="btn-sec btn-verde" onclick="jugarDeNuevo()">🔁 Jugar de nuevo</button>
+    <button class="btn-main" style="width:auto;font-size:17px;padding:14px" onclick="ir('podio')">🏆 Podio</button>
+  </div>
+</div>
+
+<!-- ══════════════ PODIO ══════════════ -->
+<div id="screen-podio" class="screen screen-sec hidden">
+  <div class="sec-head"><button class="btn-volver" onclick="ir('inicio')">← Volver</button><div class="sec-titulo">🏆 Podio navideño</div></div>
+  <div class="podio-row" id="podio-row"></div>
+  <div class="tabla-wrap vidrio">
+    <table class="data-table">
+      <thead><tr><th>#</th><th>Nombre</th><th>%</th><th>✓</th><th>✗</th><th>⏱</th><th>⭐</th><th>Estado</th></tr></thead>
+      <tbody id="ranking-tbody"></tbody>
+    </table>
+  </div>
+  <div id="podio-resumen" class="resumen vidrio hidden"></div>
+</div>
+
+<!-- ══════════════ PARTICIPANTES ══════════════ -->
+<div id="screen-participantes" class="screen screen-sec hidden">
+  <div class="sec-head"><button class="btn-volver" onclick="ir('inicio')">← Volver</button><div class="sec-titulo">📋 Participantes</div></div>
+  <input class="buscador" id="buscador" type="text" placeholder="🔍 Buscar por nombre…" oninput="filtrar()">
+  <div class="count-txt" id="count-txt"></div>
+  <div class="tabla-wrap vidrio">
+    <table class="data-table">
+      <thead><tr><th>Nombre</th><th>%</th><th>✓</th><th>✗</th><th>Estado</th><th>Fecha</th></tr></thead>
+      <tbody id="part-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════ ADMIN ══════════════ -->
+<div id="screen-admin" class="screen screen-sec hidden">
+  <div class="sec-head" style="max-width:640px"><button class="btn-volver" onclick="ir('inicio')">← Salir</button><div class="sec-titulo">⚙️ Administrador</div></div>
+
+  <div class="admin-card vidrio">
+    <div class="admin-title">📊 Métricas</div>
+    <div class="stat-grid" id="admin-stats"></div>
+  </div>
+
+  <div class="admin-card vidrio">
+    <div class="admin-title">❓ Banco de preguntas (Navidad)</div>
+    <button class="btn-a" onclick="abrirModal(null)">➕ Nueva pregunta</button>
+    <button class="btn-a gris" onclick="restaurarOficiales()">↺ Restaurar preguntas oficiales</button>
+    <div id="lista-preguntas"></div>
+  </div>
+
+  <div class="admin-card vidrio">
+    <div class="admin-title">❌ Preguntas más falladas</div>
+    <div id="pregs-falladas"></div>
+  </div>
+
+  <div class="admin-card vidrio">
+    <div class="admin-title">👥 Participantes</div>
+    <button class="btn-a rojo" onclick="borrarTodos()">🗑 Borrar todos los registros</button>
+    <div class="tabla-wrap" style="padding:0">
+      <table class="data-table">
+        <thead><tr><th>Nombre</th><th>%</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+        <tbody id="admin-part-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="admin-card vidrio">
+    <div class="admin-title">☁️ Almacenamiento</div>
+    <div class="info-box" id="info-almacen"></div>
+  </div>
+
+  <div class="admin-card vidrio">
+    <div class="admin-title">🔑 Contraseña</div>
+    <span class="a-label">Es la misma contraseña del Mundial de Preguntas (se comparte en este navegador).</span>
+    <input class="a-input" type="password" id="inp-new-pass" placeholder="Nueva contraseña (mín. 4 caracteres)">
+    <button class="btn-a" onclick="cambiarPass()">💾 Guardar contraseña</button>
+  </div>
+</div>
+
+<!-- MODAL PREGUNTA -->
+<div class="modal-overlay hidden" id="modal-preg">
+  <div class="modal-box vidrio">
+    <div class="modal-title" id="modal-titulo">Nueva pregunta</div>
+    <input type="hidden" id="edit-id">
+    <span class="a-label">Pregunta *</span>
+    <textarea class="a-input" id="q-texto" rows="3" style="resize:vertical"></textarea>
+    <span class="a-label">Opción A *</span><input class="a-input" id="q-op0">
+    <span class="a-label">Opción B *</span><input class="a-input" id="q-op1">
+    <span class="a-label">Opción C</span><input class="a-input" id="q-op2" placeholder="(opcional)">
+    <span class="a-label">Opción D</span><input class="a-input" id="q-op3" placeholder="(opcional)">
+    <span class="a-label">Respuesta correcta *</span>
+    <select class="a-input" id="q-correcta"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select>
+    <label class="chk-row"><input type="checkbox" id="q-activa" checked> Pregunta activa</label>
+    <div class="modal-btns">
+      <button class="btn-a" style="margin:0" onclick="guardarPregunta()">💾 Guardar</button>
+      <button class="btn-a gris" style="margin:0" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═════════════════════════════════════════════════════════════════
+//  CONFIGURACIÓN
+// ═════════════════════════════════════════════════════════════════
+// Mismo Apps Script / mismo Google Sheet del Mundial. Todas las llamadas llevan juego=navidad,
+// así que se usan las pestañas "Participantes Navidad" y "Preguntas Navidad" (ver apps-script/Codigo.gs).
+// Seguridad: solo se usa Sheets si el script responde al ping con juego:'navidad' (versión 2).
+// Si aún está publicado el script anterior, el juego funciona en modo local y NO escribe en las pestañas del fútbol.
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwBaCiJ3mTvycUqo58A4TpmJU1uZ0-mNE53Jfr0ZJqywnd_THRTGGfF35HLbvFYDJfs1w/exec';
+const JUEGO = 'navidad';
+
+const CFG = { TIMER_SEG:60, APROBAR:70, MAX_PREG:10, PASS_DEFAULT:'SDS2026' };
+const K = { q:'nav_preguntas', p:'nav_participantes', pass:'mun_pass', mute:'nav_mute' };
+
+// ── Preguntas oficiales (Educaplay: "¿Qué tanto sabemos del lineamiento de conflicto de intereses?") ──
+const PREGUNTAS_DEFAULT = [
+  { id:'nv_1', active:true, fails:0,
+    text:'Corresponde a ____________ coordinar sesiones informativas y/o de capacitación en prevención, identificación y gestión de conflictos de intereses.',
+    options:['Los contratistas de la SDS.','Los funcionarios de la SDS.','La Dirección de Gestión del Talento Humano.'], correct:2 },
+  { id:'nv_2', active:true, fails:0,
+    text:'Si se declara el impedimento, el jefe inmediato, a través de memorando, comunicará la decisión tanto ____________ como al servidor público incurso en la causal de conflicto de interés.',
+    options:['A la Dirección de Gestión del Talento Humano.','A la Dirección de Servicio a la Ciudadanía.','A la Defensoría del Pueblo.'], correct:0 },
+  { id:'nv_3', active:true, fails:0,
+    text:'¿Dónde podemos encontrar el Lineamiento de Conflicto de Intereses de la SDS?',
+    options:['En AGILSALUD.','En ISOLUCIÓN.','En la página de la Alcaldía Mayor de Bogotá.'], correct:1 },
+  { id:'nv_4', active:true, fails:0,
+    text:'La SDS debe designar supervisor de un contrato de prestación de servicios. Carlos, funcionario de planta, es propuesto como supervisor; sin embargo, el contratista seleccionado, Andrés, resulta ser sobrino de Carlos. Estamos ante:',
+    options:['Una obligación del contratista.','Un derecho del servidor.','Un conflicto de interés.'], correct:2 },
+  { id:'nv_5', active:true, fails:0,
+    text:'Si el jefe inmediato o supervisor, según sea el caso, encuentra dificultades jurídicas para resolver la existencia de un potencial conflicto de intereses, podrá solicitar asesoría ____________',
+    options:['A la Oficina de Asuntos Jurídicos de la SDS.','A la Oficina de Asuntos Conciliatorios de la SDS.','A la Subdirección de Contratación de la SDS.'], correct:0 },
+  { id:'nv_6', active:true, fails:0,
+    text:'Juan se quiere posesionar en su nuevo cargo de planta en la SDS; no obstante, fue sancionado disciplinariamente tres o más veces en los últimos cinco (5) años por faltas graves y/o leves dolosas. Estamos ante:',
+    options:['Pérdida de investidura.','Inhabilidad para posesionarse en el cargo.','Ninguna consecuencia.'], correct:1 },
+  { id:'nv_7', active:true, fails:0,
+    text:'Son sujetos obligados a declarar un conflicto de interés:',
+    options:['Los servidores públicos y contratistas.','Persona natural o jurídica que tenga o haya tenido relación laboral o comercial con la SDS.','Todas las anteriores.'], correct:2 },
+  { id:'nv_8', active:true, fails:0,
+    text:'El tema de conflicto de intereses en la Secretaría Distrital de Salud está plasmado en:',
+    options:['Un folleto de Conflicto de Intereses.','Un Lineamiento de Conflicto de Intereses.','Una resolución de la Alcaldía Mayor de Bogotá.'], correct:1 },
+];
+
+// ═════════════════════════════════════════════════════════════════
+//  DATOS (localStorage + Sheets opcional)
+// ═════════════════════════════════════════════════════════════════
+let _qCache = null, _pCache = null;
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2) }
+function leer(k){ try{ return JSON.parse(localStorage.getItem(k)) }catch(e){ return null } }
+function guardar(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)) }catch(e){} }
+function getQ(){ return _qCache || leer(K.q) || PREGUNTAS_DEFAULT.map(q=>({...q})) }
+function getP(){ return leer(K.p) || [] }
+function getPass(){ return leer(K.pass) || CFG.PASS_DEFAULT }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+function urlSheets(params){
+  return SHEETS_URL+'?'+new URLSearchParams({...params, juego:JUEGO, t:Date.now()}).toString();
+}
+// Estado del Apps Script (se verifica una vez por carga):
+//   'v2'      → responde con soporte de juego=navidad: se lee y se escribe en Sheets.
+//   'viejo'   → responde pero sin soporte navideño: NO se escribe (para no mezclar con el fútbol).
+//   'sin-red' → la respuesta no llega (p. ej. la red bloquea script.googleusercontent.com):
+//               se ENVÍAN los resultados igual (el POST se ejecuta en Google antes de la redirección,
+//               como en el fútbol), pero las lecturas usan los datos locales.
+const estadoSheets = (async()=>{
+  if(!SHEETS_URL) return 'viejo';
+  try{
+    const r = await fetch(urlSheets({action:'ping'}));
+    const j = await r.json();
+    return (j && j.ok && j.juego===JUEGO) ? 'v2' : 'viejo';
+  }catch(e){ console.warn('Sheets ping sin respuesta (¿red bloqueada?):',e); return 'sin-red' }
+})();
+const sheetsActivo = estadoSheets.then(e=>e==='v2');
+
+async function postSheets(body){
+  if((await estadoSheets)==='viejo') return;
+  try{ await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({...body, juego:JUEGO})}) }
+  catch(e){ console.warn('Sheets POST error:',e) }
+}
+async function getSheets(params){
+  if(!(await sheetsActivo)) return null;
+  try{
+    const r = await fetch(urlSheets(params));
+    const j = await r.json();
+    return (j && j.ok && j.juego===JUEGO) ? j : null;
+  }catch(e){ console.warn('Sheets GET error:',e); return null }
+}
+async function fetchPreguntasSheets(){
+  const json = await getSheets({action:'getPreguntas'});
+  if(!json || !Array.isArray(json.data)) return null;
+  if(!json.data.length){
+    // Pestaña "Preguntas Navidad" vacía → se sube el banco actual (oficial por defecto)
+    postSheets({action:'savePreguntas',preguntas:getQ()});
+    return null;
+  }
+  const qs = json.data.map(d=>({
+    id:String(d.id||uid()), text:String(d.texto||''),
+    options:[d.op0,d.op1,d.op2,d.op3].map(o=>o==null?'':String(o)).filter(o=>o.trim()),
+    correct:Number(d.correcta)||0,
+    active:d.activa===true||d.activa==='TRUE'||d.activa==='true',
+    fails:Number(d.fallos)||0
+  })).filter(q=>q.text);
+  _qCache = qs; guardar(K.q,qs); return qs;
+}
+function savePreguntas(qs){
+  guardar(K.q,qs); _qCache = qs;
+  postSheets({action:'savePreguntas',preguntas:qs});
+}
+async function fetchParticipantes(){
+  const json = await getSheets({});
+  if(json && Array.isArray(json.data)){
+    return json.data.map(d=>({
+      id:uid(), _row:d._row, name:String(d.nombre||''), score:Number(d.puntaje)||0,
+      correct:Number(d.correctas)||0, incorrect:Number(d.incorrectas)||0,
+      date:d.fecha||new Date().toISOString(), approved:Number(d.puntaje)>=CFG.APROBAR,
+      tiempo:Number(d.tiempo_segundos)||0, puntos:Number(d.puntos)||0
+    })).filter(p=>p.name);
+  }
+  return getP();
+}
+
+(function initPreguntas(){
+  if(!leer(K.p)) guardar(K.p,[]);
+  if(!leer(K.q)) guardar(K.q,PREGUNTAS_DEFAULT);
+  fetchPreguntasSheets();
+})();
+
+// ═════════════════════════════════════════════════════════════════
+//  NAVEGACIÓN
+// ═════════════════════════════════════════════════════════════════
+const PANTALLAS = ['inicio','admin-login','juego','resultado','podio','participantes','admin'];
+function ir(nombre){
+  PANTALLAS.forEach(p=>document.getElementById('screen-'+p).classList.add('hidden'));
+  document.getElementById('screen-'+nombre).classList.remove('hidden');
+  window.scrollTo(0,0);
+  if(nombre!=='juego') detenerTimer();
+  if(nombre==='inicio'){ Audio8.musica(true); }
+  if(nombre==='podio') renderPodio();
+  if(nombre==='participantes'){ _pCache=null; renderParticipantes(); }
+  if(nombre==='admin') renderAdmin();
+}
+function irAdminLogin(){
+  document.getElementById('inp-pass').value='';
+  document.getElementById('err-pass').style.display='none';
+  ir('admin-login');
+}
+function verificarAdmin(){
+  if(document.getElementById('inp-pass').value===getPass()) ir('admin');
+  else document.getElementById('err-pass').style.display='block';
+}
+
+// ═════════════════════════════════════════════════════════════════
+//  AUDIO (sintetizado con Web Audio — sin archivos externos)
+// ═════════════════════════════════════════════════════════════════
+const Audio8 = (()=>{
+  let ctx=null, master=null, musicGain=null, timerMus=null, nextT=0, paso=0;
+  let mute = !!leer(K.mute);
+  const NF = n=>{ // 'E4' → Hz
+    const m=n.match(/^([A-G])(#?)(\d)$/); const base={C:-9,D:-7,E:-5,F:-4,G:-2,A:0,B:2}[m[1]]+(m[2]?1:0);
+    return 440*Math.pow(2,(base+(+m[3]-4)*12)/12);
+  };
+  // "Jingle Bells" (J. L. Pierpont, 1857 · dominio público) — [nota, duración en corcheas]
+  const MEL = [
+    ['E5',2],['E5',2],['E5',4],['E5',2],['E5',2],['E5',4],['E5',2],['G5',2],['C5',3],['D5',1],['E5',8],
+    ['F5',2],['F5',2],['F5',3],['F5',1],['F5',2],['E5',2],['E5',2],['E5',1],['E5',1],['E5',2],['D5',2],['D5',2],['E5',2],['D5',4],['G5',4],
+    ['E5',2],['E5',2],['E5',4],['E5',2],['E5',2],['E5',4],['E5',2],['G5',2],['C5',3],['D5',1],['E5',8],
+    ['F5',2],['F5',2],['F5',3],['F5',1],['F5',2],['E5',2],['E5',2],['E5',1],['E5',1],['G5',2],['G5',2],['F5',2],['D5',2],['C5',8]
+  ];
+  const BAJO = ['C3','C3','G2','C3','F2','C3','G2','C3'];
+  const CORCHEA = 0.19;
+  function init(){
+    if(ctx) { if(ctx.state==='suspended') ctx.resume(); return true; }
+    try{
+      ctx = new (window.AudioContext||window.webkitAudioContext)();
+      master = ctx.createGain(); master.gain.value = mute?0:1; master.connect(ctx.destination);
+      musicGain = ctx.createGain(); musicGain.gain.value = 0; musicGain.connect(master);
+      return true;
+    }catch(e){ return false }
+  }
+  function tono(freq,t,dur,{tipo='sine',vol=.2,dest=master,ataque=.005}={}){
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type=tipo; o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+ataque); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g); g.connect(dest); o.start(t); o.stop(t+dur+.05);
+    return o;
+  }
+  function cascabel(t,vol=.06,dest=master){
+    const len=Math.floor(ctx.sampleRate*.12), b=ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+    const s=ctx.createBufferSource(); s.buffer=b;
+    const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=6500;
+    const g=ctx.createGain(); g.gain.value=vol;
+    s.connect(hp); hp.connect(g); g.connect(dest); s.start(t);
+  }
+  function campanita(freq,t,vol=.12,dest=master){ // caja de música
+    tono(freq,t,1.1,{tipo:'sine',vol,dest});
+    tono(freq*2,t,.5,{tipo:'sine',vol:vol*.35,dest});
+    tono(freq*3.01,t,.25,{tipo:'triangle',vol:vol*.12,dest});
+  }
+  function programar(){
+    while(nextT < ctx.currentTime + .4){
+      const [n,d] = MEL[paso % MEL.length];
+      campanita(NF(n), nextT, .11, musicGain);
+      const beatIdx = Math.floor(sumHasta(paso%MEL.length)/2);
+      if(sumHasta(paso%MEL.length)%2===0){
+        cascabel(nextT,.035,musicGain);
+        if(beatIdx%2===0) tono(NF(BAJO[(beatIdx/2|0)%BAJO.length]), nextT, .5, {tipo:'triangle',vol:.07,dest:musicGain});
+      }
+      nextT += d*CORCHEA; paso++;
+    }
+  }
+  const _acum=[]; let s=0; MEL.forEach(m=>{_acum.push(s); s+=m[1]});
+  function sumHasta(i){ return _acum[i] }
+  return {
+    init,
+    get mute(){ return mute },
+    setMute(v){ mute=v; guardar(K.mute,v); if(master) master.gain.setTargetAtTime(v?0:1,ctx.currentTime,.05) },
+    musica(on, vol=.55){
+      if(!init()) return;
+      if(on){
+        musicGain.gain.setTargetAtTime(vol,ctx.currentTime,.4);
+        if(!timerMus){ nextT=ctx.currentTime+.1; timerMus=setInterval(programar,120) }
+      }else{
+        musicGain.gain.setTargetAtTime(0,ctx.currentTime,.3);
+        clearInterval(timerMus); timerMus=null;
+      }
+    },
+    acierto(){ if(!init())return; const t=ctx.currentTime; ['C6','E6','G6','C7'].forEach((n,i)=>campanita(NF(n),t+i*.07,.16)); for(let i=0;i<6;i++) cascabel(t+i*.05,.08) },
+    fallo(){ if(!init())return; const t=ctx.currentTime;
+      const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sawtooth';
+      o.frequency.setValueAtTime(300,t); o.frequency.exponentialRampToValueAtTime(90,t+.55);
+      const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=900;
+      g.gain.setValueAtTime(.14,t); g.gain.exponentialRampToValueAtTime(.001,t+.6);
+      o.connect(lp); lp.connect(g); g.connect(master); o.start(t); o.stop(t+.65) },
+    click(){ if(!init())return; tono(NF('A5'),ctx.currentTime,.12,{tipo:'triangle',vol:.08}) },
+    tick(){ if(!init())return; tono(1400,ctx.currentTime,.06,{tipo:'square',vol:.03}) },
+    whoosh(){ if(!init())return; const t=ctx.currentTime, len=Math.floor(ctx.sampleRate*.9), b=ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0);
+      for(let i=0;i<len;i++){ const p=i/len; d[i]=(Math.random()*2-1)*Math.sin(Math.PI*p) }
+      const s=ctx.createBufferSource(); s.buffer=b; const bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=1.2;
+      bp.frequency.setValueAtTime(400,t); bp.frequency.exponentialRampToValueAtTime(2600,t+.9);
+      const g=ctx.createGain(); g.gain.value=.22; s.connect(bp); bp.connect(g); g.connect(master); s.start(t);
+      for(let i=0;i<8;i++) cascabel(t+i*.09,.05) },
+    victoria(){ if(!init())return; const t=ctx.currentTime;
+      [['C5',0],['E5',.15],['G5',.3],['C6',.45],['G5',.75],['C6',.9]].forEach(([n,d])=>{ campanita(NF(n),t+d,.18); tono(NF(n),t+d,.35,{tipo:'triangle',vol:.08}) });
+      ['C4','E4','G4'].forEach(n=>tono(NF(n),t+.9,1.6,{tipo:'triangle',vol:.07}));
+      for(let i=0;i<16;i++) cascabel(t+i*.08,.06) },
+    derrota(){ if(!init())return; const t=ctx.currentTime;
+      [['G4',0],['F4',.3],['E4',.6],['C4',.9]].forEach(([n,d])=>{ tono(NF(n),t+d,.45,{tipo:'triangle',vol:.12}); campanita(NF(n),t+d,.06) }) },
+    estallido(){ if(!init())return; const t=ctx.currentTime, len=Math.floor(ctx.sampleRate*.5), b=ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0);
+      for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2);
+      const s=ctx.createBufferSource(); s.buffer=b; const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=1800;
+      const g=ctx.createGain(); g.gain.value=.12; s.connect(lp); lp.connect(g); g.connect(master); s.start(t) }
+  };
+})();
+function toggleSonido(){
+  Audio8.init();
+  Audio8.setMute(!Audio8.mute);
+  document.getElementById('btn-sonido').textContent = Audio8.mute?'🔇':'🔊';
+}
+document.getElementById('btn-sonido').textContent = Audio8.mute?'🔇':'🔊';
+function _primerToque(){
+  Audio8.init();
+  const vis = PANTALLAS.find(p=>!document.getElementById('screen-'+p).classList.contains('hidden'));
+  if(vis==='inicio' || vis==='juego') Audio8.musica(true, vis==='juego'?.3:.55);
+}
+document.addEventListener('pointerdown',_primerToque,{once:true});
+document.addEventListener('keydown',_primerToque,{once:true});
+
+// ═════════════════════════════════════════════════════════════════
+//  FX: NIEVE + PARTÍCULAS
+// ═════════════════════════════════════════════════════════════════
+const RED_MOV = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+(function estrellas(){
+  const c=document.getElementById('estrellas'); let h='';
+  for(let i=0;i<70;i++){ const s=Math.random()*2+1; h+=`<i class="estrella" style="left:${Math.random()*100}%;top:${Math.random()*65}%;width:${s}px;height:${s}px;animation-delay:${(Math.random()*3).toFixed(2)}s;animation-duration:${(2+Math.random()*3).toFixed(2)}s"></i>` }
+  c.innerHTML=h;
+})();
+
+const Nieve = (()=>{
+  const cv=document.getElementById('nieve'), cx=cv.getContext('2d');
+  let W=0,H=0,dpr=1,copos=[],viento=0,vientoObj=0;
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio||1,2); W=innerWidth; H=innerHeight;
+    cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px'; cx.setTransform(dpr,0,0,dpr,0,0);
+    const n=Math.round(Math.min(160,W*H/9000));
+    copos=Array.from({length:n},()=>nuevo(true));
+  }
+  function nuevo(rand){
+    const z=Math.random(); // profundidad
+    return {x:Math.random()*W,y:rand?Math.random()*H:-10,r:.8+z*2.6,v:.35+z*1.2,a:.35+z*.55,o:Math.random()*6.28,w:.4+Math.random()*1.1};
+  }
+  addEventListener('resize',resize);
+  addEventListener('pointermove',e=>{ vientoObj=((e.clientX/W)-.5)*1.6 });
+  function loop(){
+    cx.clearRect(0,0,W,H);
+    viento+=(vientoObj-viento)*.02;
+    for(const c of copos){
+      c.o+=.012*c.w; c.y+=c.v; c.x+=Math.sin(c.o)*.45+viento*c.v;
+      if(c.y>H+6){ Object.assign(c,nuevo(false)) }
+      if(c.x>W+6) c.x=-6; if(c.x<-6) c.x=W+6;
+      cx.globalAlpha=c.a; cx.beginPath(); cx.arc(c.x,c.y,c.r,0,6.283); cx.fillStyle='#fff'; cx.fill();
+    }
+    cx.globalAlpha=1;
+    requestAnimationFrame(loop);
+  }
+  resize(); if(!RED_MOV) requestAnimationFrame(loop);
+  return {};
+})();
+
+const FX = (()=>{
+  const cv=document.getElementById('fx'), cx=cv.getContext('2d');
+  let W=0,H=0,dpr=1,ps=[],corriendo=false,fuegosT=null;
+  function resize(){ dpr=Math.min(window.devicePixelRatio||1,2); W=innerWidth; H=innerHeight; cv.width=W*dpr; cv.height=H*dpr; cv.style.width=W+'px'; cv.style.height=H+'px'; cx.setTransform(dpr,0,0,dpr,0,0) }
+  addEventListener('resize',resize); resize();
+  function arrancar(){ if(!corriendo){ corriendo=true; requestAnimationFrame(loop) } }
+  function loop(){
+    cx.clearRect(0,0,W,H);
+    cx.globalCompositeOperation='lighter';
+    for(let i=ps.length-1;i>=0;i--){
+      const p=ps[i]; p.vx*=p.fr; p.vy=p.vy*p.fr+p.g; p.x+=p.vx; p.y+=p.vy; p.vida-=p.dec;
+      if(p.vida<=0){ ps.splice(i,1); continue }
+      cx.globalAlpha=Math.max(0,p.vida);
+      if(p.estrella){ dibujarEstrella(p.x,p.y,p.r*p.vida+1,p.c) }
+      else { cx.beginPath(); cx.arc(p.x,p.y,p.r,0,6.283); cx.fillStyle=p.c; cx.fill() }
+    }
+    cx.globalAlpha=1; cx.globalCompositeOperation='source-over';
+    if(ps.length) requestAnimationFrame(loop); else { corriendo=false; cx.clearRect(0,0,W,H) }
+  }
+  function dibujarEstrella(x,y,r,c){
+    cx.beginPath();
+    for(let i=0;i<8;i++){ const a=i*Math.PI/4, rr=i%2?r*.38:r; cx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr) }
+    cx.closePath(); cx.fillStyle=c; cx.fill();
+  }
+  function burst(x,y,{n=40,cols=['#ffcf5a','#fff','#ff5a6e','#3ee08f','#7fd3ff'],vel=6,g=.12,estrella=true,r=3}={}){
+    if(RED_MOV) n=Math.min(n,10);
+    for(let i=0;i<n;i++){
+      const a=Math.random()*6.283, v=(Math.random()*.7+.3)*vel;
+      ps.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1.5,g,fr:.965,vida:1,dec:.012+Math.random()*.012,r:r*(Math.random()*.8+.6),c:cols[i%cols.length],estrella:estrella&&Math.random()>.4});
+    }
+    arrancar();
+  }
+  function estela(x,y){ ps.push({x,y,vx:-(Math.random()*1.5+.5),vy:(Math.random()-.5)*.6,g:.01,fr:.98,vida:1,dec:.03,r:Math.random()*2+1.2,c:Math.random()>.5?'#ffcf5a':'#bfe9ff',estrella:Math.random()>.6}); arrancar() }
+  function fuegos(segundos=6){
+    clearInterval(fuegosT); const fin=Date.now()+segundos*1000;
+    const lanzar=()=>{
+      const x=W*(.15+Math.random()*.7), y=H*(.12+Math.random()*.35);
+      const pal=[['#ffcf5a','#fff3c4','#ff9f2e'],['#ff5a6e','#ffd1d8','#fff'],['#3ee08f','#c9ffe4','#fff'],['#7fd3ff','#e5f7ff','#b06bff']][Math.floor(Math.random()*4)];
+      burst(x,y,{n:70,cols:pal,vel:7.5,g:.07,r:2.6}); Audio8.estallido();
+    };
+    lanzar(); fuegosT=setInterval(()=>{ if(Date.now()>fin){ clearInterval(fuegosT); return } lanzar() },650);
+  }
+  function confeti(){
+    const cols=['#ff5a6e','#ffcf5a','#3ee08f','#7fd3ff','#ffffff','#b06bff'];
+    for(let i=0;i<140;i++) ps.push({x:Math.random()*W,y:-20-Math.random()*H*.5,vx:(Math.random()-.5)*2,vy:Math.random()*2+1,g:.03,fr:.995,vida:1.6,dec:.004,r:Math.random()*3+2,c:cols[i%cols.length],estrella:false});
+    arrancar();
+  }
+  return {burst,estela,fuegos,confeti,detener(){ clearInterval(fuegosT) }};
+})();
+
+// ═════════════════════════════════════════════════════════════════
+//  TRINEO + PUEBLO
+// ═════════════════════════════════════════════════════════════════
+let _nTrineo=0;
+function crearTrineo(cont){
+  // IDs de gradiente únicos por instancia (si el SVG original está en una pantalla oculta, Chrome no pinta sus gradientes)
+  const n=++_nTrineo;
+  const frag=document.getElementById('tpl-trineo').content.cloneNode(true);
+  frag.querySelectorAll('linearGradient[id]').forEach(g=>{
+    const viejo=g.id, nuevo=viejo+'_'+n; g.id=nuevo;
+    frag.querySelectorAll(`[fill="url(#${viejo})"]`).forEach(el=>el.setAttribute('fill',`url(#${nuevo})`));
+  });
+  cont.innerHTML=''; cont.appendChild(frag);
+}
+crearTrineo(document.getElementById('trineo-inicio'));
+
+const ANCHO_CASA = 190;
+const COLORES_CASA = [
+  ['#8c3b2c','#3b1a14'],['#2f6d57','#173a2e'],['#3e5c9a','#1d2c52'],['#9a6a2e','#4a3112'],
+  ['#7a3e7c','#3a1a3c'],['#a2423f','#4a1c1b'],['#3f7a8c','#1a3b45'],['#6b5a3b','#33291a']
+];
+const LUCES = ['#ff5a6e','#ffcf5a','#3ee08f','#7fd3ff','#b06bff'];
+function construirPueblo(n){
+  const p=document.getElementById('pueblo');
+  p.innerHTML='<div class="suelo"></div>';
+  for(let i=0;i<n;i++){
+    const [cc,ct]=COLORES_CASA[i%COLORES_CASA.length];
+    const d=document.createElement('div');
+    d.className='casa'; d.id='casa-'+i;
+    d.style.left=(i*ANCHO_CASA + (ANCHO_CASA-150)/2)+'px';
+    d.style.setProperty('--cc',cc); d.style.setProperty('--ct',ct);
+    let luces=''; for(let k=0;k<9;k++) luces+=`<i style="--lc:${LUCES[(k+i)%LUCES.length]}"></i>`;
+    d.innerHTML=`<span class="humo"></span><span class="humo"></span>
+      <div class="chimenea"></div><div class="techo"></div><div class="nieve-techo"></div><div class="luces">${luces}</div>
+      <div class="cuerpo"><div class="ventana v1"></div><div class="ventana v2"></div><div class="corona"></div><div class="puerta"></div></div>
+      <div class="marca"></div><div class="num">Casa ${i+1}</div>`;
+    p.appendChild(d);
+  }
+}
+function centrarCasa(i,animar=true){
+  const esc_=document.getElementById('escena'), p=document.getElementById('pueblo');
+  const x = esc_.clientWidth/2 - (i*ANCHO_CASA + ANCHO_CASA/2) + 30;
+  p.style.transition = animar?'':'none';
+  p.style.transform = `translateX(${x}px)`;
+  document.querySelectorAll('.casa').forEach((c,k)=>c.classList.toggle('actual',k===i));
+}
+addEventListener('resize',()=>{
+  if(GS.preguntas && !document.getElementById('screen-juego').classList.contains('hidden'))
+    centrarCasa(Math.min(GS.idx,GS.preguntas.length-1),false);
+});
+
+function centroDe(el){ const r=el.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2} }
+
+function soltarObjeto(esRegalo){
+  return new Promise(res=>{
+    const tri=document.querySelector('#trineo-juego .saco')||document.getElementById('trineo-juego');
+    const casa=document.getElementById('casa-'+GS.idx);
+    const chim=casa?casa.querySelector('.chimenea'):null;
+    if(!chim){ res(); return }
+    const a=centroDe(tri), b=centroDe(chim); b.y-=14;
+    const el=document.createElement('div');
+    el.className='objeto-cae';
+    if(esRegalo) el.textContent='🎁'; else el.innerHTML='<div class="carbon"></div>';
+    document.body.appendChild(el);
+    const off=esRegalo?15:12;
+    const anim=el.animate([
+      {transform:`translate(${a.x-off}px,${a.y-off}px) scale(.6) rotate(0deg)`,opacity:0},
+      {transform:`translate(${a.x-off}px,${a.y-off+10}px) scale(1) rotate(-10deg)`,opacity:1,offset:.12},
+      {transform:`translate(${(a.x+b.x)/2-off}px,${Math.min(a.y,b.y)-40}px) scale(1.15) rotate(${esRegalo?200:120}deg)`,opacity:1,offset:.5},
+      {transform:`translate(${b.x-off}px,${b.y-off}px) scale(.55) rotate(${esRegalo?360:260}deg)`,opacity:1}
+    ],{duration:RED_MOV?200:900,easing:'cubic-bezier(.45,0,.6,1)',fill:'forwards'});
+    anim.onfinish=()=>{ el.remove(); res(b) };
+  });
+}
+function hablarSanta(txt){
+  const b=document.querySelector('#trineo-juego .burbuja'); if(!b) return;
+  b.textContent=txt; b.classList.add('show'); setTimeout(()=>b.classList.remove('show'),1500);
+}
+function puntosFlotantes(x,y,txt){
+  const el=document.createElement('div'); el.className='puntos-flot'; el.textContent=txt;
+  el.style.left=x+'px'; el.style.top=y+'px'; document.body.appendChild(el); setTimeout(()=>el.remove(),1400);
+}
+let _estelaT=null;
+function estelaTrineo(ms){
+  clearInterval(_estelaT); const fin=Date.now()+ms;
+  _estelaT=setInterval(()=>{
+    if(Date.now()>fin){ clearInterval(_estelaT); return }
+    const t=document.querySelector('#trineo-juego .trineo'); if(!t) return;
+    const r=t.getBoundingClientRect(); FX.estela(r.left+r.width*.08,r.top+r.height*.82);
+  },40);
+}
+
+// ═════════════════════════════════════════════════════════════════
+//  JUEGO
+// ═════════════════════════════════════════════════════════════════
+let GS = {};
+let _timerInt = null;
+const FRASES_OK = ['¡Jo jo jo!','¡Regalo entregado!','¡Excelente!','¡Así se hace!','¡Bravo, ayudante!','¡Magia navideña!'];
+const FRASES_NO = ['¡Oh no, carbón!','¡Ups!','¡Casi!','¡Revisa el lineamiento!'];
+
+function mezclar(a){ const b=[...a]; for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]] } return b }
+
+function iniciarMision(){
+  const nombre=document.getElementById('inp-nombre').value.trim().replace(/\s+/g,' ');
+  if(nombre.split(' ').filter(Boolean).length<2){ document.getElementById('err-nombre').style.display='block'; return }
+  document.getElementById('err-nombre').style.display='none';
+  const activas=getQ().filter(q=>q.active && q.text && q.options && q.options.filter(o=>o&&String(o).trim()).length>=2);
+  if(!activas.length){ alert('No hay preguntas activas. El administrador debe configurarlas.'); return }
+  const preguntas=mezclar(activas).slice(0,Math.min(CFG.MAX_PREG,activas.length));
+  GS={ nombre, preguntas, idx:0, respuestas:[], correctas:0, incorrectas:0, racha:0, mejorRacha:0, puntos:0,
+       bloqueado:false, inicio:Date.now(), resultados:[] };
+  document.getElementById('hud-nombre').textContent=nombre.split(' ')[0];
+  actualizarHUD();
+  ir('juego');
+  Audio8.init(); Audio8.musica(true,.3);
+  construirPueblo(preguntas.length);
+  const tj=document.getElementById('trineo-juego'); tj.classList.remove('despegar');
+  crearTrineo(document.getElementById('trineo-flota'));
+  requestAnimationFrame(()=>centrarCasa(0,false));
+  renderPregunta();
+}
+function jugarDeNuevo(){
+  FX.detener();
+  if(GS.nombre) document.getElementById('inp-nombre').value=GS.nombre;
+  iniciarMision();
+}
+
+function actualizarHUD(){
+  const tot=GS.preguntas?GS.preguntas.length:0;
+  document.getElementById('hud-regalos').textContent=`${GS.correctas||0}/${tot}`;
+  document.getElementById('hud-racha').textContent=GS.racha||0;
+  document.getElementById('hud-puntos').textContent=(GS.puntos||0).toLocaleString('es-CO');
+  document.getElementById('espiritu-fill').style.width = tot? `${(GS.idx/tot)*100}%` : '0%';
+}
+
+function renderPregunta(){
+  const q=GS.preguntas[GS.idx], tot=GS.preguntas.length;
+  document.getElementById('badge-num').textContent=`Pregunta ${GS.idx+1} de ${tot}`;
+  document.getElementById('badge-casa').textContent=`🏠 Casa ${GS.idx+1}`;
+  document.getElementById('preg-txt').textContent=q.text;
+  const fb=document.getElementById('feedback'); fb.classList.remove('show'); fb.textContent='';
+  const cont=document.getElementById('opciones'); cont.innerHTML='';
+  const nOps=q.options.filter(o=>o&&String(o).trim()).length;
+  cont.style.setProperty('--n', nOps===4?2:nOps);
+  const letras=['A','B','C','D'];
+  q.options.forEach((op,i)=>{
+    if(!op||!String(op).trim()) return;
+    const b=document.createElement('button');
+    b.className='regalo g'+(i%4); b.dataset.i=i;
+    b.innerHTML=`<span class="lazo">🎀</span><span class="letra">${letras[i]}</span>${esc(op)}`;
+    b.onclick=()=>{ Audio8.click(); responder(i) };
+    cont.appendChild(b);
+  });
+  actualizarHUD();
+  GS.bloqueado=false;
+  iniciarTimer();
+}
+
+function detenerTimer(){ clearInterval(_timerInt); _timerInt=null }
+function iniciarTimer(){
+  detenerTimer();
+  GS.restante=CFG.TIMER_SEG; GS.tPregunta=Date.now();
+  const num=document.getElementById('timer-num'), arc=document.getElementById('timer-arc');
+  const pintar=()=>{
+    num.textContent=GS.restante;
+    arc.style.strokeDasharray=`${(GS.restante/CFG.TIMER_SEG)*100} 100`;
+    const c = GS.restante<=10?'var(--nok)':GS.restante<=25?'var(--oro)':'var(--verde)';
+    arc.style.stroke=c; num.style.color=GS.restante<=10?'var(--nok)':'#fff';
+  };
+  pintar();
+  _timerInt=setInterval(()=>{
+    GS.restante--; pintar();
+    if(GS.restante<=10 && GS.restante>0) Audio8.tick();
+    if(GS.restante<=0){ detenerTimer(); if(!GS.bloqueado) responder(-1) }
+  },1000);
+}
+
+async function responder(sel){
+  if(GS.bloqueado) return;
+  GS.bloqueado=true; detenerTimer();
+  const q=GS.preguntas[GS.idx];
+  const ok = sel===q.correct;
+  const restante=Math.max(0,GS.restante||0);
+  GS.respuestas.push({qId:q.id, sel, ok});
+  GS.resultados.push(ok);
+
+  // Botones
+  document.querySelectorAll('.regalo').forEach(b=>{
+    const i=+b.dataset.i; b.disabled=true;
+    if(i===q.correct) b.classList.add('correcta');
+    else if(i===sel) b.classList.add('incorrecta');
+    else b.classList.add('atenuada');
+  });
+
+  const fb=document.getElementById('feedback');
+  const tri=document.getElementById('trineo-juego');
+  // En pantallas pequeñas: si la escena quedó fuera de vista, subir para ver la entrega del regalo
+  if(window.scrollY>120){ window.scrollTo({top:0,behavior:'smooth'}); await new Promise(r=>setTimeout(r,450)) }
+  if(ok){
+    GS.correctas++; GS.racha++; GS.mejorRacha=Math.max(GS.mejorRacha,GS.racha);
+    const mult = GS.racha>=5?2:GS.racha>=3?1.5:1;
+    const gan = Math.round((1000 + (restante/CFG.TIMER_SEG)*500) * mult);
+    GS.puntos+=gan;
+    fb.innerHTML=`<span class="ok">✓ ¡Correcto!</span>${mult>1?` <span style="color:var(--oro)">🔥 Racha x${mult}</span>`:''}`;
+    Audio8.acierto();
+    hablarSanta(FRASES_OK[Math.floor(Math.random()*FRASES_OK.length)]);
+    const rb=document.getElementById('hud-racha-b'); rb.classList.remove('on'); void rb.offsetWidth; rb.classList.add('on');
+    fb.classList.add('show');
+    const destino = await soltarObjeto(true);
+    const casa=document.getElementById('casa-'+GS.idx);
+    if(casa){ casa.classList.add('encendida'); casa.querySelector('.marca').textContent='🎁' }
+    if(destino){ FX.burst(destino.x,destino.y,{n:46}); puntosFlotantes(destino.x,destino.y-30,'+'+gan.toLocaleString('es-CO')) }
+  } else {
+    GS.incorrectas++; GS.racha=0;
+    fb.innerHTML = sel===-1 ? '<span class="nok">⏱ ¡Se acabó el tiempo!</span>' : '<span class="nok">✕ Respuesta incorrecta</span>';
+    fb.innerHTML += ' <span style="color:var(--txt-2);font-weight:500">· la correcta está marcada en verde</span>';
+    fb.classList.add('show');
+    Audio8.fallo();
+    hablarSanta(FRASES_NO[Math.floor(Math.random()*FRASES_NO.length)]);
+    tri.classList.remove('sacudir'); void tri.offsetWidth; tri.classList.add('sacudir');
+    const destino = await soltarObjeto(false);
+    const casa=document.getElementById('casa-'+GS.idx);
+    if(casa){ casa.classList.add('apagada'); casa.querySelector('.marca').textContent='🪨' }
+    if(destino) FX.burst(destino.x,destino.y,{n:18,cols:['#666','#999','#444'],vel:3,estrella:false,g:.2});
+  }
+  actualizarHUD();
+
+  setTimeout(()=>{
+    tri.classList.remove('sacudir');
+    GS.idx++;
+    actualizarHUD();
+    if(GS.idx>=GS.preguntas.length){
+      Audio8.whoosh(); estelaTrineo(1600);
+      tri.classList.add('despegar');
+      setTimeout(mostrarResultado,1500);
+    } else {
+      mostrarParada(GS.idx+1, GS.preguntas.length);
+      setTimeout(()=>{
+        Audio8.whoosh();
+        tri.classList.remove('avanzar'); void tri.offsetWidth; tri.classList.add('avanzar');
+        setTimeout(()=>tri.classList.remove('avanzar'),1350);
+        estelaTrineo(1300);
+        centrarCasa(GS.idx,true);
+        renderPregunta();
+      },850);
+    }
+  }, ok?1900:2600);
+}
+
+function mostrarParada(n,tot){
+  const el=document.createElement('div'); el.className='overlay-parada';
+  el.innerHTML=`<div class="op-t">¡Siguiente parada!</div><div class="op-s">🛷 Casa ${n} de ${tot}</div>`;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),1900);
+}
+
+// ═════════════════════════════════════════════════════════════════
+//  RESULTADO
+// ═════════════════════════════════════════════════════════════════
+function fmtT(s){ return s>0 ? (s>=60?`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')} min`:`${s}s`) : '—' }
+
+function mostrarResultado(){
+  const {correctas,incorrectas,preguntas,nombre,respuestas,puntos,mejorRacha,resultados}=GS;
+  const total=preguntas.length, pct=Math.round(correctas/total*100), aprobado=pct>=CFG.APROBAR;
+  const ahora=new Date(), tiempo=Math.round((Date.now()-GS.inicio)/1000);
+  const part={ id:uid(), name:nombre, score:pct, correct:correctas, incorrect:incorrectas, total, approved:aprobado,
+               date:ahora.toISOString(), answers:respuestas, tiempo, puntos };
+  const ps=getP(); ps.push(part); guardar(K.p,ps); _pCache=null;
+  postSheets({ nombre, puntaje:pct, correctas, incorrectas, fecha:part.date, tiempo_segundos:tiempo, puntos });
+
+  const qs=getQ();
+  respuestas.forEach(r=>{ if(!r.ok){ const q=qs.find(x=>x.id===r.qId); if(q) q.fails=(q.fails||0)+1 } });
+  guardar(K.q,qs); if(_qCache) _qCache=qs;
+
+  Audio8.musica(false);
+  ir('resultado');
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-ok').textContent=correctas;
+  document.getElementById('res-nok').textContent=incorrectas;
+  document.getElementById('res-tiempo').textContent=fmtT(tiempo);
+  document.getElementById('res-puntos').textContent=puntos.toLocaleString('es-CO');
+  document.getElementById('res-racha').textContent=mejorRacha;
+  document.getElementById('res-pueblo').innerHTML=resultados.map((r,i)=>`<span class="${r?'':'off'}"><b>${r?'🏠':'🏚️'}</b>${r?'🎁':'🪨'}</span>`).join('');
+  document.getElementById('res-info').innerHTML=`<strong style="color:#fff">${esc(nombre)}</strong><br>${ahora.toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'})}`;
+
+  const t=document.getElementById('res-titulo'), est=document.getElementById('res-estado');
+  if(aprobado){
+    document.getElementById('res-icono').textContent='🎅';
+    t.className='res-titulo gano'; t.textContent='¡Navidad salvada!';
+    document.getElementById('res-msg').textContent=`¡Ayudaste a Papá Noel a entregar ${correctas} de ${total} regalos! Conoces muy bien el Lineamiento de Conflicto de Intereses de la Secretaría Distrital de Salud. Elaborado por la Oficina de Control Disciplinario Interno.`;
+    est.className='estado-pill pill-ok'; est.textContent='🎄 Aprobado';
+    Audio8.victoria(); setTimeout(()=>FX.fuegos(7),300); setTimeout(()=>FX.confeti(),900);
+  } else {
+    document.getElementById('res-icono').textContent='☃️';
+    t.className='res-titulo perdio'; t.textContent='¡Casi lo logras!';
+    document.getElementById('res-msg').textContent=`Entregaste ${correctas} de ${total} regalos. Algunas casas se quedaron con carbón… Repasa el Lineamiento de Conflicto de Intereses (en ISOLUCIÓN) y vuelve a intentarlo: ¡Papá Noel cuenta contigo!`;
+    est.className='estado-pill pill-no'; est.textContent='❄ No aprobado';
+    Audio8.derrota();
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════
+//  PODIO / PARTICIPANTES
+// ═════════════════════════════════════════════════════════════════
+function ordenarRanking(ps){
+  return [...ps].sort((a,b)=> b.score-a.score || (a.tiempo||99999)-(b.tiempo||99999) || (b.puntos||0)-(a.puntos||0) || a.incorrect-b.incorrect);
+}
+async function renderPodio(){
+  const row=document.getElementById('podio-row');
+  row.innerHTML='<p style="color:var(--txt-3)">⏳ Cargando resultados…</p>';
+  const ps=ordenarRanking(await fetchParticipantes());
+  row.innerHTML='';
+  if(!ps.length) row.innerHTML='<p style="color:var(--txt-3)">Aún no hay participantes.</p>';
+  else {
+    const med=['🥇','🥈','🥉'], cls=['p1','p2','p3'];
+    [1,0,2].forEach(i=>{
+      const p=ps[i], d=document.createElement('div'); d.className='podio-item '+cls[i];
+      d.innerHTML = p
+        ? `<div class="podio-medal">${i===0?'⭐':med[i]}</div><div class="podio-nombre">${esc(p.name)}</div><div class="podio-pct">${p.score}%</div><div class="podio-t">⏱ ${fmtT(p.tiempo)}</div><div class="podio-bloque">${i+1}°</div>`
+        : `<div class="podio-medal" style="opacity:.3">${med[i]}</div><div class="podio-nombre" style="opacity:.3">—</div><div class="podio-bloque" style="opacity:.3">${i+1}°</div>`;
+      row.appendChild(d);
+    });
+  }
+  const tb=document.getElementById('ranking-tbody'); tb.innerHTML='';
+  const med=['🥇','🥈','🥉'];
+  ps.forEach((p,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${med[i]||i+1}</td><td>${esc(p.name)}</td><td class="pct-col">${p.score}%</td><td class="ok">${p.correct}</td><td class="nok">${p.incorrect}</td>
+      <td style="font-size:13px;color:var(--txt-2)">${fmtT(p.tiempo)}</td><td style="font-size:13px;color:var(--oro)">${(p.puntos||0).toLocaleString('es-CO')}</td>
+      <td class="${p.approved?'ok':'nok'}">${p.approved?'✅':'❌'}</td>`;
+    tb.appendChild(tr);
+  });
+  if(!ps.length) tb.innerHTML='<tr><td colspan="8" class="vacio">Sin participantes aún</td></tr>';
+  const res=document.getElementById('podio-resumen');
+  if(ps.length){
+    const ap=ps.filter(p=>p.approved).length, avg=Math.round(ps.reduce((s,p)=>s+p.score,0)/ps.length);
+    res.innerHTML=`<strong style="color:var(--oro)">📊 Estadísticas</strong><br>Participantes: <b>${ps.length}</b> · Promedio: <b>${avg}%</b><br>
+      Aprobados: <b class="ok">${ap}</b> · No aprobados: <b class="nok">${ps.length-ap}</b> · Aprobación: <b>${Math.round(ap/ps.length*100)}%</b>`;
+    res.classList.remove('hidden');
+  } else res.classList.add('hidden');
+}
+async function renderParticipantes(filtro=''){
+  const tb=document.getElementById('part-tbody');
+  if(!_pCache){ tb.innerHTML='<tr><td colspan="6" class="vacio">⏳ Cargando…</td></tr>'; _pCache=await fetchParticipantes() }
+  const todos=_pCache, f=filtro.toLowerCase();
+  const filt=f?todos.filter(p=>p.name.toLowerCase().includes(f)):todos;
+  const ord=[...filt].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById('count-txt').textContent=`${filt.length} de ${todos.length} participante(s)`;
+  tb.innerHTML='';
+  ord.forEach(p=>{
+    const d=new Date(p.date).toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${esc(p.name)}</td><td class="pct-col">${p.score}%</td><td class="ok">${p.correct}</td><td class="nok">${p.incorrect}</td>
+      <td class="${p.approved?'ok':'nok'}">${p.approved?'✅ Aprobado':'❌ No aprobado'}</td><td style="font-size:12px;color:var(--txt-3)">${d}</td>`;
+    tb.appendChild(tr);
+  });
+  if(!ord.length) tb.innerHTML='<tr><td colspan="6" class="vacio">Sin resultados</td></tr>';
+}
+function filtrar(){ renderParticipantes(document.getElementById('buscador').value) }
+
+// ═════════════════════════════════════════════════════════════════
+//  ADMIN
+// ═════════════════════════════════════════════════════════════════
+let _adminPs=[];
+async function renderAdmin(){
+  document.getElementById('admin-stats').innerHTML='<div style="color:var(--txt-3)">⏳ Cargando…</div>';
+  const ps=await fetchParticipantes(); _adminPs=ps; const qs=getQ();
+  const ap=ps.filter(p=>p.approved).length;
+  const avg=ps.length?Math.round(ps.reduce((s,p)=>s+p.score,0)/ps.length):0;
+  const mejor=ps.length?Math.max(...ps.map(p=>p.score)):0;
+  document.getElementById('admin-stats').innerHTML=[
+    [ps.length,'Participantes'],[avg+'%','Promedio'],[mejor+'%','Mejor puntaje'],[ap,'Aprobados'],[ps.length-ap,'No aprobados'],[qs.filter(q=>q.active).length,'Preguntas activas']
+  ].map(([n,l])=>`<div class="stat"><div class="stat-n">${n}</div><div class="stat-l">${l}</div></div>`).join('');
+
+  const lp=document.getElementById('lista-preguntas'); lp.innerHTML='';
+  qs.forEach((q,i)=>{
+    const d=document.createElement('div'); d.className='q-item';
+    d.innerHTML=`<div style="flex:1"><div class="q-item-txt">${i+1}. ${esc(q.text)}</div>
+      <div class="q-pills"><span class="qp ${q.active?'on':'off'}">${q.active?'Activa':'Inactiva'}</span>
+      <span class="qp">🎁 Correcta: ${['A','B','C','D'][q.correct]||'?'} — ${esc((q.options||[])[q.correct]||'')}</span><span class="qp">❌ Fallos: ${q.fails||0}</span></div></div>
+      <div class="q-btns">
+        <button class="btn-a azul peq" data-act="edit">✏️</button>
+        <button class="btn-a rojo peq" data-act="del">🗑</button>
+        <button class="btn-a gris peq ${q.active?'on':''}" data-act="tog">${q.active?'ON':'OFF'}</button>
+      </div>`;
+    d.querySelector('[data-act=edit]').onclick=()=>abrirModal(q.id);
+    d.querySelector('[data-act=del]').onclick=()=>eliminarPregunta(q.id);
+    d.querySelector('[data-act=tog]').onclick=()=>togglePregunta(q.id);
+    lp.appendChild(d);
+  });
+  if(!qs.length) lp.innerHTML='<p style="color:var(--txt-3)">Sin preguntas.</p>';
+
+  const fall=qs.filter(q=>(q.fails||0)>0).sort((a,b)=>b.fails-a.fails).slice(0,5);
+  document.getElementById('pregs-falladas').innerHTML = fall.length
+    ? fall.map((q,i)=>`<div class="q-item"><div class="q-item-txt">${i+1}. ${esc(q.text)}</div><span class="qp off">${q.fails} fallos</span></div>`).join('')
+    : '<p style="color:var(--txt-3);font-size:14px">Sin datos aún (se cuentan en este navegador).</p>';
+
+  const tb=document.getElementById('admin-part-tbody'); tb.innerHTML='';
+  [...ps].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(p=>{
+    const d=new Date(p.date).toLocaleDateString('es-CO',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${esc(p.name)}</td><td class="pct-col">${p.score}%</td><td class="${p.approved?'ok':'nok'}">${p.approved?'✅':'❌'}</td><td style="font-size:12px;color:var(--txt-3)">${d}</td><td><button class="btn-a rojo peq">✕</button></td>`;
+    tr.querySelector('button').onclick=()=>elimPart(p);
+    tb.appendChild(tr);
+  });
+  if(!ps.length) tb.innerHTML='<tr><td colspan="5" class="vacio">Sin participantes</td></tr>';
+
+  const est = await estadoSheets;
+  document.getElementById('info-almacen').innerHTML =
+    est==='v2' ? '✅ <b>Conectado a Google Sheets</b> (mismo Sheet del Mundial): pestañas <code>Participantes Navidad</code> y <code>Preguntas Navidad</code>. Resultados y preguntas se comparten entre dispositivos.'
+  : est==='sin-red' ? `⚠️ <b>Esta red no deja leer las respuestas de Google Sheets</b> (bloqueo de <code>script.googleusercontent.com</code>).
+       Los resultados <b>sí se envían</b> a la pestaña <code>Participantes Navidad</code>, pero el podio y esta lista muestran solo los datos de este navegador.
+       Desde otra red (p. ej. datos móviles) se ve el consolidado.`
+  : `💾 <b>Modo local:</b> el Apps Script publicado no es la versión 2 (con soporte del juego navideño), así que no se escribe en el Sheet.
+       Pega el código de <code>apps-script/Codigo.gs</code> y publica una <b>nueva versión</b> de la implementación existente.`;
+}
+async function borrarTodos(){
+  if(!confirm('¿Borrar TODOS los registros de participantes del juego navideño? Esta acción no se puede deshacer.')) return;
+  guardar(K.p,[]); _pCache=null;
+  if((await estadoSheets)!=='viejo'){
+    try{ await fetch(urlSheets({action:'deleteAll'}),{mode:'no-cors'}) }catch(e){ console.warn('Sheets deleteAll:',e) }
+  }
+  renderAdmin();
+}
+async function elimPart(p){
+  if(!confirm(`¿Eliminar el registro de ${p.name}?`)) return;
+  _pCache=null;
+  if(p._row && await sheetsActivo) await getSheets({action:'deleteRow',row:p._row});
+  else guardar(K.p,getP().filter(x=>x.id!==p.id));
+  renderAdmin();
+}
+function restaurarOficiales(){
+  if(!confirm('¿Restaurar las 8 preguntas oficiales? Se reemplazará el banco actual del juego navideño.')) return;
+  savePreguntas(PREGUNTAS_DEFAULT.map(q=>({...q})));
+  renderAdmin();
+}
+function eliminarPregunta(id){
+  if(!confirm('¿Eliminar esta pregunta?')) return;
+  savePreguntas(getQ().filter(q=>q.id!==id)); renderAdmin();
+}
+function togglePregunta(id){
+  const qs=getQ(), q=qs.find(x=>x.id===id); if(q) q.active=!q.active;
+  savePreguntas(qs); renderAdmin();
+}
+function cambiarPass(){
+  const v=document.getElementById('inp-new-pass').value.trim();
+  if(v.length<4){ alert('La contraseña debe tener al menos 4 caracteres.'); return }
+  guardar(K.pass,v); document.getElementById('inp-new-pass').value='';
+  alert('✅ Contraseña actualizada (aplica también al Mundial de Preguntas en este navegador).');
+}
+function abrirModal(id){
+  document.getElementById('modal-preg').classList.remove('hidden');
+  const q = id ? getQ().find(x=>x.id===id) : null;
+  document.getElementById('modal-titulo').textContent = q?'Editar pregunta':'Nueva pregunta';
+  document.getElementById('edit-id').value = q?q.id:'';
+  document.getElementById('q-texto').value = q?q.text:'';
+  for(let i=0;i<4;i++) document.getElementById('q-op'+i).value = q?(q.options[i]||''):'';
+  document.getElementById('q-correcta').value = q?q.correct:0;
+  document.getElementById('q-activa').checked = q?q.active:true;
+}
+function cerrarModal(){ document.getElementById('modal-preg').classList.add('hidden') }
+function guardarPregunta(){
+  const texto=document.getElementById('q-texto').value.trim();
+  if(!texto){ alert('La pregunta no puede estar vacía.'); return }
+  const ops=[]; for(let i=0;i<4;i++){ const v=document.getElementById('q-op'+i).value.trim(); if(v) ops.push(v) }
+  if(ops.length<2){ alert('Necesitas al menos 2 opciones.'); return }
+  const corr=parseInt(document.getElementById('q-correcta').value,10);
+  if(corr>=ops.length){ alert('La respuesta correcta seleccionada no existe en las opciones.'); return }
+  const activa=document.getElementById('q-activa').checked, eid=document.getElementById('edit-id').value;
+  const qs=getQ();
+  if(eid){ const i=qs.findIndex(q=>q.id===eid); if(i>=0) qs[i]={...qs[i],text:texto,options:ops,correct:corr,active:activa} }
+  else qs.push({id:uid(),text:texto,options:ops,correct:corr,active:activa,fails:0});
+  savePreguntas(qs); cerrarModal(); renderAdmin();
+}
+document.getElementById('modal-preg').addEventListener('click',function(e){ if(e.target===this) cerrarModal() });
+</script>
+</body>
+</html>
