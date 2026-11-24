@@ -170,6 +170,27 @@ input,textarea,select{font-family:inherit}
 /* TRINEO */
 .trineo-juego{position:absolute;left:50%;top:5%;width:min(280px,54vw);transform:translateX(-58%);z-index:4;pointer-events:none}
 .trineo-flota{animation:flotar 2.4s ease-in-out infinite}
+
+/* LEMAS de la actividad: carteles de madera junto a las casitas (pantallas anchas) o franja bajo la escena */
+.cartel{display:none;position:absolute;top:5%;width:min(25%,330px);z-index:3;pointer-events:none;
+  padding:10px 16px 9px;border-radius:12px;text-align:center;color:#fff8e6;
+  background:linear-gradient(180deg,#a0602e 0%,#7a4219 55%,#5e3112 100%);
+  border:2px solid #3f2008;box-shadow:0 8px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,220,170,.35);
+  animation:mecer 5s ease-in-out infinite;transform-origin:top center}
+.cartel::before{content:'';position:absolute;left:-5px;right:-5px;top:-8px;height:14px;border-radius:10px 10px 7px 7px;
+  background:#f2faff;box-shadow:0 2px 4px rgba(0,0,0,.25)}
+.cartel.izq{left:2.5%}
+.cartel.der{right:calc(7% + 76px);animation-delay:-2.5s}
+.cartel b{display:block;font-size:clamp(14px,1.25vw,17px);font-weight:700;line-height:1.25;letter-spacing:.3px;
+  color:#ffe9a8;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.cartel small{display:block;margin-top:4px;font-size:clamp(11px,.95vw,13px);font-weight:500;line-height:1.3;color:#fff3dc}
+@keyframes mecer{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
+.lema-franja{width:100%;position:relative;z-index:5;padding:8px 14px 9px;text-align:center;
+  background:linear-gradient(180deg,#7a4219,#5e3112);border-top:2px solid #e9f6ff;border-bottom:2px solid rgba(255,207,90,.45);
+  box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.lema-franja b{display:block;font-size:clamp(13px,3.4vw,16px);font-weight:700;line-height:1.25;color:#ffe9a8;letter-spacing:.3px}
+.lema-franja span{display:block;margin-top:2px;font-size:clamp(11.5px,3vw,14px);font-weight:500;line-height:1.3;color:#fff3dc}
+@media(min-width:1100px){ .cartel{display:block} .lema-franja{display:none} }
 @keyframes flotar{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(1deg)}}
 .trineo-juego.sacudir .trineo-flota{animation:sacudir .5s ease}
 @keyframes sacudir{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px) rotate(-6deg)}40%{transform:translateX(9px) rotate(5deg)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
@@ -488,7 +509,13 @@ input,textarea,select{font-family:inherit}
       <path d="M0 300 L0 220 L150 170 L300 215 L450 160 L620 220 L780 170 L950 215 L1100 175 L1200 205 L1200 300 Z" fill="#1c3a6e"/>
     </svg>
     <div class="pueblo" id="pueblo"><div class="suelo"></div></div>
+    <div class="cartel izq"><b>¡QUE TUS INTERESES NO COMPROMETAN TUS DECISIONES!</b></div>
+    <div class="cartel der"><b>¡IDENTIFICA, DECLARA Y ACTÚA!</b><small>Claves para gestionar los conflictos de intereses en la SDS.</small></div>
     <div class="trineo-juego" id="trineo-juego"><div class="trineo-flota" id="trineo-flota"></div></div>
+  </div>
+  <div class="lema-franja">
+    <b>¡QUE TUS INTERESES NO COMPROMETAN TUS DECISIONES!</b>
+    <span><b style="display:inline;font-size:inherit">¡IDENTIFICA, DECLARA Y ACTÚA!</b> Claves para gestionar los conflictos de intereses en la SDS.</span>
   </div>
 
   <div class="panel">
@@ -638,30 +665,30 @@ const K = { q:'nav_preguntas', p:'nav_participantes', pass:'mun_pass', mute:'nav
 
 // ── Preguntas oficiales: "ACTIVIDAD CONFLICTO DE INTERESES 2026" (respuesta correcta = la resaltada en amarillo) ──
 const PREGUNTAS_DEFAULT = [
-  { id:'nv26_1', active:true, fails:0,
+  { id:'nv26b_1', active:true, fails:0,
     text:'Son sujetos obligados a declarar un conflicto de intereses:',
     options:['Persona natural o jurídica que tenga o haya tenido relación laboral o comercial con la SDS.','Los servidores públicos.','Los contratistas.','Todas las anteriores.'], correct:3 },
-  { id:'nv26_2', active:true, fails:0,
+  { id:'nv26b_2', active:true, fails:0,
     text:'____________ podemos encontrar el Lineamiento de Conflicto de Intereses de la SDS.',
-    options:['En la página de la Alcaldía Mayor de Bogotá.','En AGILSALUD.','En ISOLUCIÓN.'], correct:2 },
-  { id:'nv26_3', active:true, fails:0,
+    options:['En ISOLUCIÓN.','En la página de la Alcaldía Mayor de Bogotá.','En AGILSALUD.'], correct:0 },
+  { id:'nv26b_3', active:true, fails:0,
     text:'¿Qué se entiende por conflicto de intereses en el ejercicio de la función pública?',
-    options:['Una diferencia de opiniones entre dos servidores públicos sobre la manera de desarrollar una actividad laboral.','Una situación en la que el interés general propio de la función pública entra en conflicto con un interés particular y directo del servidor público.','Una relación de amistad entre compañeros de trabajo, independientemente de las funciones que desempeñen.','Todas las anteriores.'], correct:1 },
-  { id:'nv26_4', active:true, fails:0,
+    options:['Una diferencia de opiniones entre dos servidores públicos sobre la manera de desarrollar una actividad laboral.','Una relación de amistad entre compañeros de trabajo, independientemente de las funciones que desempeñen.','Una situación en la que el interés general propio de la función pública entra en conflicto con un interés particular y directo del servidor público.','Todas las anteriores.'], correct:2 },
+  { id:'nv26b_4', active:true, fails:0,
     text:'Un servidor público identifica que debe intervenir en un asunto en el que su primo tiene un interés particular y directo. ¿Qué debe hacer?',
-    options:['Continuar con el trámite, siempre que considere que puede actuar objetivamente.','Esperar a que un tercero presente una recusación para abstenerse de intervenir.','Informar por escrito a su superior jerárquico, dentro de los tres días siguientes al conocimiento de la situación, explicar las razones del impedimento y realizar el registro correspondiente en SIDEAP.','Todas las anteriores.'], correct:2 },
-  { id:'nv26_5', active:true, fails:0,
+    options:['Informar por escrito a su superior jerárquico, dentro de los tres días siguientes al conocimiento de la situación, explicar las razones del impedimento y realizar el registro correspondiente en SIDEAP.','Continuar con el trámite, siempre que considere que puede actuar objetivamente.','Esperar a que un tercero presente una recusación para abstenerse de intervenir.','Todas las anteriores.'], correct:0 },
+  { id:'nv26b_5', active:true, fails:0,
     text:'¿Cuál de las siguientes afirmaciones sobre la recusación es correcta?',
     options:['Solo procede cuando el servidor público reconoce voluntariamente que tiene un conflicto de intereses.','Es un mecanismo mediante el cual cualquier persona, interna o externa a la entidad, puede poner de presente una situación que podría impedir que un servidor o colaborador conozca de determinado asunto.','Permite que el servidor continúe interviniendo en el asunto mientras se resuelve la solicitud.','Todas las anteriores.'], correct:1 },
-  { id:'nv26_6', active:true, fails:0,
+  { id:'nv26b_6', active:true, fails:0,
     text:'María, contratista de la Secretaría Distrital de Salud, tiene dentro de sus obligaciones contractuales apoyar la revisión de documentos técnicos relacionados con diferentes instituciones prestadoras de servicios de salud. Durante la ejecución del contrato, se entera de que una de las instituciones cuyos documentos debe revisar es una sociedad en la que tiene participación como socia. Al identificar esta situación, reconoce que podría existir un interés particular que afecte su imparcialidad frente a la actividad asignada. ¿Cuál es el procedimiento que debe seguir la contratista?',
-    options:['Continuar ejecutando la actividad porque su vinculación es contractual y no laboral.','Informar inmediatamente y por escrito a su supervisor, dentro de los tres días siguientes al conocimiento de la situación, registrar la declaración correspondiente en SIDEAP y exponer las razones por las cuales considera que debe ser separada de esa actividad.','Solicitar a un compañero contratista que revise los documentos sin informar al supervisor.','Todas las anteriores.'], correct:1 },
-  { id:'nv26_7', active:true, fails:0,
+    options:['Continuar ejecutando la actividad porque su vinculación es contractual y no laboral.','Solicitar a un compañero contratista que revise los documentos sin informar al supervisor.','Informar inmediatamente y por escrito a su supervisor, dentro de los tres días siguientes al conocimiento de la situación, registrar la declaración correspondiente en SIDEAP y exponer las razones por las cuales considera que debe ser separada de esa actividad.','Todas las anteriores.'], correct:2 },
+  { id:'nv26b_7', active:true, fails:0,
     text:'José, servidor público de la SDS, tiene a su cargo la revisión y trámite de una solicitud presentada por una empresa en la que trabajó anteriormente y con la que aún mantiene una relación personal cercana con uno de sus directivos. Al advertir esta situación, considera que no representa un impedimento para cumplir sus funciones. ¿Qué debería hacer para gestionar adecuadamente esta situación?',
     options:['Identificar el posible conflicto y declararlo por escrito.','Registrarlo en SIDEAP y presentar oportunamente el impedimento.','Abstenerse de intervenir mientras se resuelve.','Todas las anteriores.'], correct:3 },
-  { id:'nv26_8', active:true, fails:0,
+  { id:'nv26b_8', active:true, fails:0,
     text:'En el evento que el jefe inmediato o supervisor, según sea el caso, encuentre dificultades jurídicas para resolver la existencia de un conflicto de intereses, podrá solicitar asesoría ____________.',
-    options:['A la Subdirección de Contratación de la SDS.','A la Oficina de Asuntos Jurídicos de la SDS.','A la Oficina de Control Disciplinario Interno.','A la Subdirección de Gestión de Talento Humano.'], correct:3 },
+    options:['A la Subdirección de Contratación de la SDS.','A la Oficina de Asuntos Jurídicos de la SDS.','A la Oficina de Control Disciplinario Interno.','A la Subdirección de Gestión de Talento Humano.'], correct:1 },
 ];
 
 // ═════════════════════════════════════════════════════════════════
@@ -724,16 +751,17 @@ async function fetchPreguntasSheets(){
     fails:Number(d.fallos)||0
   })).filter(q=>q.text);
   if(esBancoAnterior(qs)){
-    // Sheets aún tiene el banco oficial anterior (Educaplay) → se reemplaza una sola vez por el de 2026
+    // Sheets aún tiene un banco oficial anterior → se reemplaza una sola vez por el vigente
     const nuevo = PREGUNTAS_DEFAULT.map(q=>({...q}));
     savePreguntas(nuevo); return nuevo;
   }
   _qCache = qs; guardar(K.q,qs); return qs;
 }
-// Banco oficial anterior (ids nv_1…nv_8, sin preguntas agregadas a mano): se migra solo al nuevo banco 2026.
-// Si el administrador había agregado preguntas propias, no se toca; puede usar "Restaurar preguntas oficiales".
+// Bancos oficiales anteriores (ids nv_* = Educaplay, nv26_* = primera versión 2026), sin preguntas agregadas
+// a mano: se migran solos al banco vigente (nv26b_*). Si el administrador agregó preguntas propias, no se toca;
+// puede usar "Restaurar preguntas oficiales".
 function esBancoAnterior(qs){
-  return Array.isArray(qs) && qs.length>0 && qs.every(q=>/^nv_\d+$/.test(String(q.id)));
+  return Array.isArray(qs) && qs.length>0 && qs.every(q=>/^nv(26)?_\d+$/.test(String(q.id)));
 }
 function savePreguntas(qs){
   guardar(K.q,qs); _qCache = qs;
